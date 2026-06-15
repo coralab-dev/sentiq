@@ -60,7 +60,7 @@ export default function RestaurantResponsesPage() {
                 calificacion: <RatingScore value={2} />,
                 fecha: "18 may., 14:32",
               },
-              actions: <ActionMenu items={[{ label: "Ver detalle" }, { label: "Asignar" }]} />,
+              actions: <ActionMenu items={[{ label: "Ver detalle" }]} />,
             },
             {
               id: "response-2",

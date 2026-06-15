@@ -27,9 +27,9 @@ export default function RestaurantAlertsPage() {
           icon={<CheckCircle2 className="size-5" aria-hidden="true" />}
         />
         <MetricCard
-          label="Atendidas"
-          value="3"
-          helper="Con seguimiento"
+          label="Total de alertas"
+          value="18"
+          helper="En el periodo"
           variant="neutral"
           icon={<PauseCircle className="size-5" aria-hidden="true" />}
         />
@@ -43,7 +43,7 @@ export default function RestaurantAlertsPage() {
         </FilterField>
         <FilterField label="Estado">
           <select className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700">
-            <option>Pendientes y pausadas</option>
+            <option>Pendientes y atendidas</option>
           </select>
         </FilterField>
         <FilterField label="Sucursal">
@@ -91,10 +91,10 @@ export default function RestaurantAlertsPage() {
               alerta: "Rapidez del servicio",
               sucursal: "Sucursal Valle",
               zona: "Bar",
-              estado: <StatusBadge status="paused" />,
+              estado: <StatusBadge status="attended" />,
               fecha: "18 may., 09:47",
             },
-            actions: <ActionMenu items={[{ label: "Ver detalle" }, { label: "Reactivar" }]} />,
+            actions: <ActionMenu items={[{ label: "Ver detalle" }]} />,
           },
         ]}
         emptyState={
