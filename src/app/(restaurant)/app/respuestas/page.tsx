@@ -55,7 +55,7 @@ export default function RestaurantResponsesPage() {
               cells: {
                 respuesta: "La comida tardo mucho y llego fria.",
                 sucursal: "Sucursal Centro",
-                fuente: "QR mesa 12",
+                fuente: "QR sucursal",
                 estado: <StatusBadge status="pending" />,
                 calificacion: <RatingScore value={2} />,
                 fecha: "18 may., 14:32",

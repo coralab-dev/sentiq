@@ -27,9 +27,9 @@ export default function RestaurantAlertsPage() {
           icon={<CheckCircle2 className="size-5" aria-hidden="true" />}
         />
         <MetricCard
-          label="Pausadas"
+          label="Atendidas"
           value="3"
-          helper="En seguimiento"
+          helper="Con seguimiento"
           variant="neutral"
           icon={<PauseCircle className="size-5" aria-hidden="true" />}
         />
@@ -80,8 +80,7 @@ export default function RestaurantAlertsPage() {
               <ActionMenu
                 items={[
                   { label: "Ver detalle" },
-                  { label: "Asignar" },
-                  { label: "Eliminar", destructive: true },
+                    { label: "Marcar atendida" },
                 ]}
               />
             ),
