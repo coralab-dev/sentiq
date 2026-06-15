@@ -10,7 +10,8 @@ type StatusVariant =
   | "unassigned"
   | "success"
   | "error"
-  | "neutral";
+  | "neutral"
+  | "completed";
 
 type StatusBadgeProps = {
   status: StatusVariant;
@@ -29,6 +30,7 @@ const statusStyles: Record<StatusVariant, string> = {
   success: "bg-emerald-50 text-emerald-700 ring-emerald-100",
   error: "bg-red-50 text-red-700 ring-red-100",
   neutral: "bg-slate-100 text-slate-700 ring-slate-200",
+  completed: "bg-emerald-50 text-emerald-700 ring-emerald-100",
 };
 
 const statusLabels: Record<StatusVariant, string> = {
@@ -42,6 +44,7 @@ const statusLabels: Record<StatusVariant, string> = {
   success: "Correcto",
   error: "Error",
   neutral: "Neutral",
+  completed: "Completado",
 };
 
 export function StatusBadge({ status, label = statusLabels[status], className }: StatusBadgeProps) {

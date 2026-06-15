@@ -19,7 +19,7 @@ export function LoadingState({
       role="status"
       aria-live="polite"
       className={cn(
-        "flex min-h-48 flex-col items-center justify-center rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm",
+        "flex min-h-48 flex-col items-center justify-center rounded-lg border border-slate-200 bg-white p-8 text-center shadow-sm",
         className
       )}
     >
