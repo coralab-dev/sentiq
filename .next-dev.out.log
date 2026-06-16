@@ -31,3 +31,8 @@
  GET /app/alertas/detalle/?id=3aa6edb0-5590-49e9-932d-effdfba69e99 404 in 882ms
  GET /app/alertas/detalle/?id=3aa6edb0-5590-49e9-932d-effdfba69e99 404 in 247ms
  GET /app/alertas/ 200 in 219ms
+ GET /app/alertas/detalle/?id=3aa6edb0-5590-49e9-932d-effdfba69e99 404 in 95ms
+ GET /app/alertas/detalle/?id=3aa6edb0-5590-49e9-932d-effdfba69e99 404 in 120ms
+ GET /app/alertas/ 200 in 144ms
+ ✓ Compiled in 1238ms (976 modules)
+ GET /app/alertas/ 200 in 182ms
