@@ -50,6 +50,14 @@ function DetailItem({ label, value }: DetailItemProps) {
   );
 }
 
+function getAlertStatusBadge(status: string) {
+  if (status === "attended") {
+    return <StatusBadge status="attended" />;
+  }
+
+  return <StatusBadge status="pending" />;
+}
+
 export function ResponseDetailClient() {
   const searchParams = useSearchParams();
   const responseId = searchParams.get("id");
@@ -319,7 +327,7 @@ export function ResponseDetailClient() {
                 <DetailItem label="ID de alerta" value={alert.id} />
                 <DetailItem
                   label="Estado"
-                  value={<StatusBadge status="neutral" label={alert.status} />}
+                  value={getAlertStatusBadge(alert.status)}
                 />
                 <DetailItem
                   label="Creada"
