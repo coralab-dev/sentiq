@@ -214,11 +214,6 @@ export function AlertsClient() {
 
   const branchSelectDisabled = data.branches.length <= 1 || isRefreshing;
   const showNoBranchesState = !isInitialLoading && !errorMessage && data.branches.length === 0;
-  const showEmptyState =
-    !isInitialLoading &&
-    !errorMessage &&
-    data.branches.length > 0 &&
-    enrichedAlerts.length === 0;
 
   function updateFilters(nextFilters: Partial<AlertFilters>) {
     setFilters((current) => ({
@@ -568,12 +563,6 @@ export function AlertsClient() {
             />
           </SectionCard>
 
-          {showEmptyState ? (
-            <EmptyState
-              title="Sin resultados"
-              description="No hay alertas visibles que coincidan con los filtros activos."
-            />
-          ) : null}
         </>
       ) : null}
     </div>
