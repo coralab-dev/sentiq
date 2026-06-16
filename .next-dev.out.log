@@ -8,7 +8,26 @@
    - Environments: .env.local
 
  ✓ Starting...
- ✓ Ready in 3.4s
- ○ Compiling / ...
- ✓ Compiled / in 2.8s (768 modules)
-[?25h
+ ✓ Ready in 3s
+ ○ Compiling /app/alertas ...
+ ✓ Compiled /app/alertas in 2.2s (917 modules)
+ GET /app/alertas/ 200 in 3019ms
+ ○ Compiling /login ...
+ ✓ Compiled /login in 917ms (928 modules)
+ GET /login/ 200 in 1043ms
+ GET /app/alertas/ 200 in 372ms
+ GET /app/alertas/ 200 in 116ms
+ GET /login/ 200 in 41ms
+ ○ Compiling /app/dashboard ...
+ ✓ Compiled /app/dashboard in 1294ms (960 modules)
+ GET /app/dashboard/ 200 in 1572ms
+ GET /app/dashboard/ 200 in 67ms
+ ○ Compiling /app/respuestas ...
+ ✓ Compiled /app/respuestas in 600ms (958 modules)
+ GET /app/respuestas/ 200 in 703ms
+ GET /app/alertas/ 200 in 55ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 695ms (962 modules)
+ GET /app/alertas/detalle/?id=3aa6edb0-5590-49e9-932d-effdfba69e99 404 in 882ms
+ GET /app/alertas/detalle/?id=3aa6edb0-5590-49e9-932d-effdfba69e99 404 in 247ms
+ GET /app/alertas/ 200 in 219ms
