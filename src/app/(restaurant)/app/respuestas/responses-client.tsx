@@ -522,7 +522,7 @@ export function ResponsesClient() {
                 },
                 actions: (
                   <Link
-                    href={`${ROUTES.APP_RESPONSES}/${response.id}`}
+                    href={`${ROUTES.APP_RESPONSE_DETAIL}?id=${response.id}`}
                     className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50"
                   >
                     <Eye className="size-3.5" aria-hidden="true" />
