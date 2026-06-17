@@ -13,7 +13,7 @@ import {
   Zap,
 } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   DataTable,
@@ -47,6 +47,12 @@ import {
   type DashboardResponse,
   type DashboardZone,
 } from "./dashboard-data";
+import {
+  DASHBOARD_POLLING_INTERVAL_MS,
+  getRealtimeStatusLabel,
+  type DashboardLoadMode,
+  type RealtimeStatus,
+} from "./dashboard-refresh";
 
 const inputClassName =
   "h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15 disabled:bg-slate-50 disabled:text-slate-400";
@@ -74,11 +80,21 @@ export function DashboardClient() {
   const [data, setData] = useState<DashboardLoadState>(initialData);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [realtimeStatus, setRealtimeStatus] = useState<RealtimeStatus>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const isLoadingRef = useRef(false);
+  const hasLoadedOnceRef = useRef(false);
 
-  const loadDashboard = useCallback(async () => {
-    setErrorMessage(null);
-    setIsRefreshing(true);
+  const loadDashboard = useCallback(async ({ mode }: { mode: DashboardLoadMode }) => {
+    if (isLoadingRef.current) {
+      return;
+    }
+
+    isLoadingRef.current = true;
+
+    if (mode === "manual") {
+      setIsRefreshing(true);
+    }
 
     try {
       const { startIso, endIso } = toDateRangeIso(dateRange);
@@ -149,19 +165,84 @@ export function DashboardClient() {
         alerts: alertsResult.data ?? [],
         lastUpdatedAt: new Date(),
       });
+      hasLoadedOnceRef.current = true;
+      setErrorMessage(null);
     } catch {
-      setErrorMessage(
-        "No pudimos cargar el dashboard. Intenta actualizar en unos momentos.",
-      );
+      if (mode === "manual" || !hasLoadedOnceRef.current) {
+        setErrorMessage(
+          "No pudimos cargar el dashboard. Intenta actualizar en unos momentos.",
+        );
+      }
     } finally {
+      isLoadingRef.current = false;
       setIsInitialLoading(false);
-      setIsRefreshing(false);
+      if (mode === "manual") {
+        setIsRefreshing(false);
+      }
     }
   }, [dateRange, selectedBranchId, supabase]);
 
   useEffect(() => {
-    void loadDashboard();
+    void loadDashboard({ mode: "manual" });
   }, [loadDashboard]);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      void loadDashboard({ mode: "auto" });
+    }, DASHBOARD_POLLING_INTERVAL_MS);
+
+    return () => window.clearInterval(intervalId);
+  }, [loadDashboard]);
+
+  useEffect(() => {
+    setRealtimeStatus("idle");
+
+    const channel = supabase
+      .channel("dashboard-pending-alerts")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "feedback_alerts",
+          filter: "status=eq.pending",
+        },
+        () => {
+          void loadDashboard({ mode: "realtime" });
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "feedback_alerts",
+          filter: "status=eq.pending",
+        },
+        () => {
+          void loadDashboard({ mode: "realtime" });
+        },
+      )
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          setRealtimeStatus("connected");
+          return;
+        }
+
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          setRealtimeStatus("error");
+          return;
+        }
+
+        if (status === "CLOSED") {
+          setRealtimeStatus("disconnected");
+        }
+      });
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [loadDashboard, supabase]);
 
   const metrics = useMemo(
     () => calculateDashboardMetrics(data.responses, data.alerts),
@@ -206,7 +287,7 @@ export function DashboardClient() {
             </Link>
             <Button
               type="button"
-              onClick={() => void loadDashboard()}
+              onClick={() => void loadDashboard({ mode: "manual" })}
               disabled={isRefreshing}
               className="bg-teal-700 text-white hover:bg-teal-800"
             >
@@ -222,11 +303,14 @@ export function DashboardClient() {
 
       <FilterBar
         actions={
-          data.lastUpdatedAt ? (
-            <p className="text-xs text-slate-500">
-              Ultima actualizacion: {formatDateTime(data.lastUpdatedAt.toISOString())}
-            </p>
-          ) : null
+          <div className="space-y-1 text-xs text-slate-500">
+            {data.lastUpdatedAt ? (
+              <p>
+                Ultima actualizacion: {formatDateTime(data.lastUpdatedAt.toISOString())}
+              </p>
+            ) : null}
+            <p>{getRealtimeStatusLabel(realtimeStatus)}</p>
+          </div>
         }
       >
         <FilterField label="Desde">
@@ -284,7 +368,7 @@ export function DashboardClient() {
           description={errorMessage}
           icon={<AlertTriangle className="size-6" aria-hidden="true" />}
           action={
-            <Button type="button" onClick={() => void loadDashboard()}>
+            <Button type="button" onClick={() => void loadDashboard({ mode: "manual" })}>
               Reintentar
             </Button>
           }
