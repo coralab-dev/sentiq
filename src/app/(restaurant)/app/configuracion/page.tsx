@@ -32,7 +32,7 @@ const settingsSections = [
     description: "Configura las preguntas visibles en la encuesta.",
     href: ROUTES.APP_SETTINGS_QUESTIONS,
     icon: CircleHelp,
-    available: false,
+    available: true,
   },
   {
     title: "Usuarios y gerentes",
