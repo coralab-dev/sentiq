@@ -22,6 +22,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 import {
   createZone,
+  getManagersEmptyLabel,
   loadZoneSettingsData,
   updateZone,
   updateZoneStatus,
@@ -232,6 +233,11 @@ function BranchDetail({ item, busyZoneId, onEdit, onToggle }: {
   onEdit: (zone: ZoneWithDevices) => void;
   onToggle: (zone: ZoneWithDevices) => Promise<void>;
 }) {
+  const managersEmptyLabel = getManagersEmptyLabel(
+    item.managersAvailable,
+    item.managers.length,
+  );
+
   return (
     <div className="space-y-5">
       <SectionCard title={item.branch.name} actions={<StatusBadge status={item.branch.status === "active" ? "active" : "inactive"} label={item.branch.status === "active" ? "Activa" : "Inactiva"} />}>
@@ -242,8 +248,8 @@ function BranchDetail({ item, busyZoneId, onEdit, onToggle }: {
         </div>
         <div className="mt-5 border-t border-slate-200 pt-4">
           <p className="flex items-center gap-2 text-xs font-semibold uppercase text-slate-500"><Users className="size-4" aria-hidden="true" />Gerentes asignados</p>
-          {!item.managersAvailable || item.managers.length === 0 ? (
-            <p className="mt-2 text-sm text-slate-600">Información no disponible</p>
+          {managersEmptyLabel ? (
+            <p className="mt-2 text-sm text-slate-600">{managersEmptyLabel}</p>
           ) : (
             <ul className="mt-2 space-y-1 text-sm text-slate-700">
               {item.managers.map((manager) => <li key={manager.id}><span className="font-medium text-slate-950">{manager.fullName}</span> · {manager.email}</li>)}

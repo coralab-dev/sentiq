@@ -5,6 +5,7 @@ import {
   buildZoneInsertPayload,
   buildZoneUpdatePayload,
   combineZoneSettingsData,
+  getManagersEmptyLabel,
   validateZoneDraft,
 } from "./zones-settings-data.ts";
 
@@ -124,6 +125,12 @@ test("marca gerentes como no disponibles sin afectar sucursales", () => {
   assert.equal(result.length, 2);
   assert.equal(result[0].managersAvailable, false);
   assert.deepEqual(result[0].managers, []);
+});
+
+test("distingue consulta de gerentes fallida de una asignación vacía", () => {
+  assert.equal(getManagersEmptyLabel(false, 0), "Información no disponible");
+  assert.equal(getManagersEmptyLabel(true, 0), "Sin gerentes asignados");
+  assert.equal(getManagersEmptyLabel(true, 1), null);
 });
 
 test("valida nombre y sucursal visible", () => {

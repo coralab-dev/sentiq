@@ -112,6 +112,15 @@ export function validateZoneDraft(draft: ZoneDraft, branches: ZoneBranch[]): Zon
   return errors;
 }
 
+export function getManagersEmptyLabel(
+  managersAvailable: boolean,
+  managerCount: number,
+): string | null {
+  if (!managersAvailable) return "Información no disponible";
+  if (managerCount === 0) return "Sin gerentes asignados";
+  return null;
+}
+
 export function buildZoneInsertPayload(
   draft: ZoneDraft,
   branches: ZoneBranch[],
