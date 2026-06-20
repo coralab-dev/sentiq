@@ -198,6 +198,7 @@ export type Database = {
           restaurant_id: Uuid;
           branch_id: Uuid;
           name: string;
+          description: string | null;
           status: string;
           created_at: Timestamp | null;
           updated_at: Timestamp | null;
@@ -207,6 +208,7 @@ export type Database = {
           restaurant_id: Uuid;
           branch_id: Uuid;
           name: string;
+          description?: string | null;
           status?: string;
           created_at?: Timestamp | null;
           updated_at?: Timestamp | null;
@@ -216,6 +218,7 @@ export type Database = {
           restaurant_id?: Uuid;
           branch_id?: Uuid;
           name?: string;
+          description?: string | null;
           status?: string;
           created_at?: Timestamp | null;
           updated_at?: Timestamp | null;

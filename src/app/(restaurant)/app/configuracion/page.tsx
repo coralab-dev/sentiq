@@ -46,7 +46,7 @@ const settingsSections = [
     description: "Organiza las zonas operativas de cada sucursal.",
     href: ROUTES.APP_SETTINGS_ZONES,
     icon: MapPinned,
-    available: false,
+    available: true,
   },
 ] as const;
 
