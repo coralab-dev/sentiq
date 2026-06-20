@@ -47,9 +47,9 @@ export type RegenerateQrTokenRequest =
   | { branch_id: string; survey_link_id?: never }
   | { survey_link_id: string; branch_id?: never };
 
-export type RegenerateDeviceTokenRequest = {
-  device_id: string;
-};
+export type RegenerateDeviceTokenRequest =
+  | { device_id: string; survey_link_id?: never }
+  | { survey_link_id: string; device_id?: never };
 
 export type RegenerateTokenResponse = {
   ok: true;
