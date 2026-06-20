@@ -1,83 +1,102 @@
-import { AppPlaceholderPage } from "@/components/layout/app-placeholder-page";
-import { ActionMenu, DataTable, SectionCard } from "@/components/panel";
-import { EmptyState, StatusBadge } from "@/components/shared";
-import { Button } from "@/components/ui/button";
+import {
+  ArrowRight,
+  CircleHelp,
+  MapPinned,
+  MonitorSmartphone,
+  QrCode,
+  Users,
+} from "lucide-react";
+import Link from "next/link";
+
+import { PageHeader } from "@/components/panel";
+import { StatusBadge } from "@/components/shared";
+import { ROUTES } from "@/config/routes";
+
+const settingsSections = [
+  {
+    title: "QR por sucursal",
+    description: "Consulta y regenera el enlace QR publico de cada sucursal.",
+    href: ROUTES.APP_SETTINGS_QR,
+    icon: QrCode,
+    available: true,
+  },
+  {
+    title: "Dispositivos",
+    description: "Administra los dispositivos usados para capturar feedback.",
+    href: ROUTES.APP_SETTINGS_DEVICES,
+    icon: MonitorSmartphone,
+    available: false,
+  },
+  {
+    title: "Preguntas",
+    description: "Configura las preguntas visibles en la encuesta.",
+    href: ROUTES.APP_SETTINGS_QUESTIONS,
+    icon: CircleHelp,
+    available: false,
+  },
+  {
+    title: "Usuarios y gerentes",
+    description: "Gestiona usuarios y el alcance asignado a gerentes.",
+    href: ROUTES.APP_SETTINGS_USERS,
+    icon: Users,
+    available: false,
+  },
+  {
+    title: "Zonas",
+    description: "Organiza las zonas operativas de cada sucursal.",
+    href: ROUTES.APP_SETTINGS_ZONES,
+    icon: MapPinned,
+    available: false,
+  },
+] as const;
 
 export default function RestaurantSettingsPage() {
   return (
-    <AppPlaceholderPage
-      title="Configuracion"
-      description="Preview de paneles para sucursales, QR, usuarios y ajustes. Sin persistencia ni permisos nuevos."
-      actions={<Button className="bg-orange-600 text-white hover:bg-orange-700">Agregar sucursal</Button>}
-    >
-      <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
-        <SectionCard title="Sucursales" contentClassName="p-0">
-          <DataTable
-            columns={[
-              { key: "sucursal", header: "Sucursal" },
-              { key: "zona", header: "Zona principal" },
-              { key: "estado", header: "Estado" },
-              { key: "qr", header: "QR" },
-            ]}
-            rows={[
-              {
-                id: "branch-1",
-                cells: {
-                  sucursal: "Sucursal Centro",
-                  zona: "Terraza",
-                  estado: <StatusBadge status="active" />,
-                  qr: "https://sentiq.app/s/abc123",
-                },
-                actions: <ActionMenu items={[{ label: "Editar" }, { label: "Ver QR" }]} />,
-              },
-              {
-                id: "branch-2",
-                cells: {
-                  sucursal: "Sucursal Sur",
-                  zona: "Salon",
-                  estado: <StatusBadge status="inactive" />,
-                  qr: "Pendiente",
-                },
-                actions: <ActionMenu items={[{ label: "Editar" }, { label: "Activar" }]} />,
-              },
-            ]}
-            emptyState={
-              <EmptyState
-                title="No hay sucursales"
-                description="Las sucursales configuradas apareceran aqui."
-                className="rounded-none border-0"
-              />
-            }
-          />
-        </SectionCard>
+    <div className="space-y-6">
+      <PageHeader
+        title="Configuracion"
+        description="Administra las opciones operativas disponibles para tu restaurante."
+      />
 
-        <SectionCard title="Codigo QR por sucursal" description="Preview visual del patron de configuracion.">
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm font-medium text-slate-950">Sucursal Centro</p>
-              <p className="text-xs text-slate-500">Enlace publico activo</p>
-            </div>
-            <div className="grid aspect-square place-items-center rounded-lg border border-slate-200 bg-slate-50">
-              <div className="grid size-36 grid-cols-5 gap-1">
-                {Array.from({ length: 25 }).map((_, index) => (
-                  <span
-                    key={index}
-                    className={
-                      index % 2 === 0 || index === 7 || index === 13
-                        ? "bg-slate-950"
-                        : "bg-white"
-                    }
-                  />
-                ))}
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {settingsSections.map((section) => {
+          const Icon = section.icon;
+
+          return (
+            <Link
+              key={section.href}
+              href={section.href}
+              className="group flex min-h-48 flex-col rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:border-teal-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <span className="grid size-11 place-items-center rounded-lg bg-teal-50 text-teal-700">
+                  <Icon className="size-5" aria-hidden="true" />
+                </span>
+                {section.available ? (
+                  <StatusBadge status="active" label="Disponible" />
+                ) : (
+                  <StatusBadge status="pending" label="Pendiente" />
+                )}
               </div>
-            </div>
-            <div className="flex items-center justify-between gap-3">
-              <StatusBadge status="active" />
-              <Button variant="outline">Copiar enlace</Button>
-            </div>
-          </div>
-        </SectionCard>
+
+              <div className="mt-5 flex-1">
+                <h2 className="font-semibold text-slate-950">{section.title}</h2>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  {section.description}
+                </p>
+              </div>
+
+              <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-teal-700">
+                Abrir configuracion
+                <ArrowRight
+                  className="size-4 transition-transform group-hover:translate-x-0.5"
+                  aria-hidden="true"
+                />
+              </span>
+            </Link>
+          );
+        })}
       </div>
-    </AppPlaceholderPage>
+    </div>
   );
 }

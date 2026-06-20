@@ -5,12 +5,12 @@ import {
   CheckCircle2,
   Clipboard,
   LoaderCircle,
-  QrCode,
   RefreshCw,
   ShieldCheck,
   Store,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
 
 import { PageHeader, SectionCard } from "@/components/panel";
 import { EmptyState, LoadingState, StatusBadge } from "@/components/shared";
@@ -293,8 +293,15 @@ export function QrSettingsClient() {
 
                   {temporaryLink ? (
                     <div className="grid gap-4 rounded-lg border border-emerald-200 bg-emerald-50/50 p-4 sm:grid-cols-[120px_1fr] sm:items-center">
-                      <div className="grid aspect-square place-items-center rounded-lg border border-emerald-200 bg-white">
-                        <QrCode className="size-20 text-slate-950" aria-label="Vista QR disponible" />
+                      <div className="grid aspect-square place-items-center rounded-lg border border-emerald-200 bg-white p-2">
+                        <QRCodeSVG
+                          value={temporaryLink.url}
+                          size={112}
+                          level="M"
+                          marginSize={2}
+                          title={`Codigo QR de ${row.branch.name}`}
+                          className="size-full max-h-28 max-w-28"
+                        />
                       </div>
                       <div className="min-w-0 space-y-3">
                         <div>
