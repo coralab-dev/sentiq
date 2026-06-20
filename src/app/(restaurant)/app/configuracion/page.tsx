@@ -25,7 +25,7 @@ const settingsSections = [
     description: "Administra los dispositivos usados para capturar feedback.",
     href: ROUTES.APP_SETTINGS_DEVICES,
     icon: MonitorSmartphone,
-    available: false,
+    available: true,
   },
   {
     title: "Preguntas",
