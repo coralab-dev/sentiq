@@ -28,6 +28,25 @@ export type CreateRestaurantRequest = {
   contact_phone?: string | null;
   plan_code: "demo" | "basico" | "pro" | "custom";
   account_status: "demo" | "pilot" | "active";
+  branch_name: string;
+  branch_slug?: string | null;
+  branch_address?: string | null;
+  branch_internal_phone?: string | null;
+  branch_notes?: string | null;
+  create_initial_qr?: boolean;
+};
+
+export type CreateRestaurantResponse = {
+  ok: true;
+  restaurant_id: string;
+  restaurant_slug: string;
+  account_id: string;
+  settings_id: string;
+  branch_id: string;
+  branch_slug: string;
+  qr_link_id?: string;
+  qr_url?: string;
+  token_last4?: string;
 };
 
 export type CreateRestaurantAdminRequest = {
