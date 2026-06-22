@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 
 import {
   loadQuestionsSettingsData,
+  getSettingsValidationMessage,
   QUESTION_DEFINITIONS,
   saveQuestionsSettingsData,
   validateQuestionValues,
@@ -126,7 +127,7 @@ export function QuestionsSettingsClient() {
 
     if (Object.keys(nextErrors).length > 0 || Object.keys(visualErrors).length > 0) {
       setSaveMessage(null);
-      setSaveError("Completa las cuatro preguntas antes de guardar.");
+      setSaveError(getSettingsValidationMessage(nextErrors, visualErrors));
       return;
     }
 

@@ -5,11 +5,17 @@ import {
   DEFAULT_QUESTION_VALUES,
   DEFAULT_SURVEY_VISUAL_VALUES,
   buildSettingsPayload,
+  getSettingsValidationMessage,
   normalizeQuestionValues,
   normalizeSurveyVisualValues,
   validateSurveyVisualValues,
   validateQuestionValues,
 } from "./questions-settings-data.ts";
+
+test("distingue errores visuales de preguntas requeridas", () => {
+  assert.equal(getSettingsValidationMessage({}, { logo_url: "error" }), "Corrige la URL del logo y los colores antes de guardar.");
+  assert.equal(getSettingsValidationMessage({ question_food_text: "error" }, {}), "Completa las cuatro preguntas antes de guardar.");
+});
 
 test("normaliza valores visuales faltantes con defaults", () => {
   assert.deepEqual(normalizeSurveyVisualValues(null), DEFAULT_SURVEY_VISUAL_VALUES);

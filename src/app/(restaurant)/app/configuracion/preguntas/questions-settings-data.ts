@@ -104,6 +104,12 @@ export function validateSurveyVisualValues(values: SurveyVisualValues): SurveyVi
   return errors;
 }
 
+export function getSettingsValidationMessage(questionErrors: QuestionErrors, visualErrors: SurveyVisualErrors) {
+  if (Object.keys(visualErrors).length > 0) return "Corrige la URL del logo y los colores antes de guardar.";
+  if (Object.keys(questionErrors).length > 0) return "Completa las cuatro preguntas antes de guardar.";
+  return null;
+}
+
 export function buildSettingsPayload(input: { questions: QuestionValues; visuals: SurveyVisualValues }) {
   const questions = Object.fromEntries(Object.entries(input.questions).map(([k, v]) => [k, v.trim()])) as QuestionValues;
   const visuals = Object.fromEntries(Object.entries(input.visuals).map(([k, v]) => [k, v.trim() || null])) as Record<keyof SurveyVisualValues, string | null>;
