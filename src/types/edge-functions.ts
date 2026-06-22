@@ -55,6 +55,15 @@ export type CreateRestaurantAdminRequest = {
   email: string;
 };
 
+export type CreateRestaurantAdminResponse = {
+  ok: true;
+  user_id: string;
+  email: string;
+  restaurant_id: string;
+  status: "active" | "invited";
+  created: boolean;
+};
+
 export type CreateManagerUserRequest = {
   full_name: string;
   email: string;
