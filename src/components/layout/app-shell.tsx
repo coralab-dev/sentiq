@@ -46,6 +46,13 @@ function isActiveNavigationItem(pathname: string, href: string): boolean {
 }
 
 function getShellTitle(pathname: string): string {
+  if (isActiveNavigationItem(pathname, ROUTES.PLATFORM_ADMIN_RESTAURANT_NEW)) {
+    return "Nuevo restaurante";
+  }
+
+  if (isActiveNavigationItem(pathname, ROUTES.PLATFORM_ADMIN_RESTAURANTS)) {
+    return "Restaurantes";
+  }
   if (isActiveNavigationItem(pathname, ROUTES.APP_DASHBOARD)) {
     return "Dashboard";
   }
@@ -204,13 +211,14 @@ export function AppShell({ children }: AppShellProps) {
   }
 
   const shellTitle = getShellTitle(pathname);
+  const shellLabel = sessionState.role === "platform_admin" ? "Panel de plataforma" : "Panel restaurante";
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-950">
       <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-slate-200 bg-white lg:flex lg:flex-col">
         <div className="border-b border-slate-200 px-5 py-5">
           <p className="text-base font-semibold">SentiQ</p>
-          <p className="text-xs text-slate-500">Panel restaurante</p>
+          <p className="text-xs text-slate-500">{shellLabel}</p>
         </div>
         <div className="flex-1 px-3 py-4">
           <AppNavigation role={sessionState.role} />
@@ -235,7 +243,7 @@ export function AppShell({ children }: AppShellProps) {
           <div className="flex min-h-16 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
             <div className="min-w-0">
               <p className="text-xs font-medium uppercase tracking-normal text-slate-500">
-                Panel restaurante
+                {shellLabel}
               </p>
               <h1 className="truncate text-lg font-semibold tracking-normal">
                 {shellTitle}
