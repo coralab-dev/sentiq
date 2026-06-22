@@ -39,7 +39,7 @@ const settingsSections = [
     description: "Gestiona usuarios y el alcance asignado a gerentes.",
     href: ROUTES.APP_SETTINGS_USERS,
     icon: Users,
-    available: false,
+    available: true,
   },
   {
     title: "Zonas",
