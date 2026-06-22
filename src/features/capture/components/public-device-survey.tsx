@@ -18,6 +18,7 @@ import {
   submitPublicFeedback,
 } from "@/features/capture/api/public-survey";
 import type { PublicSurveyConfig, RatingValue } from "@/types/domain";
+import { getSurveyTheme } from "@/features/capture/survey-theme";
 
 const INVALID_LINK_MESSAGE = "Este enlace no esta disponible. Solicita apoyo al restaurante.";
 const COMMENT_MAX_LENGTH = 500;
@@ -166,7 +167,7 @@ export function PublicDeviceSurvey({ token }: PublicDeviceSurveyProps) {
         <ThankYouMessage
           mode="device"
           title="Gracias por tu opinion"
-          description="Tu respuesta fue registrada. Esta pantalla se reiniciara automaticamente para el siguiente cliente."
+          description={config.survey_thank_you_text ?? undefined}
           actionLabel="Nueva encuesta"
           onAction={resetSurvey}
           className="max-w-xl shadow-sm"
@@ -301,9 +302,10 @@ export function PublicDeviceSurvey({ token }: PublicDeviceSurveyProps) {
             <div className="flex items-center gap-4">
               <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-200">
                 <div
-                  className="h-full rounded-full bg-teal-700 transition-all"
+                  className="h-full rounded-full transition-all"
                   style={{
                     width: `${(ratingFields.filter(({ key }) => form[key]).length / ratingFields.length) * 100}%`,
+                    backgroundColor: getSurveyTheme(config).primaryColor,
                   }}
                 />
               </div>
@@ -404,7 +406,8 @@ export function PublicDeviceSurvey({ token }: PublicDeviceSurveyProps) {
           type="submit"
           size="lg"
           disabled={isSubmitting}
-          className="h-14 w-full bg-orange-600 text-lg font-semibold text-white shadow-sm hover:bg-orange-700"
+          className="h-14 w-full text-lg font-semibold text-white shadow-sm"
+          style={{ backgroundColor: getSurveyTheme(config).secondaryColor }}
         >
           <Send className="size-5" aria-hidden="true" />
           {isSubmitting ? "Enviando..." : "Enviar y reiniciar"}

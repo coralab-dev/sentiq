@@ -15,11 +15,17 @@ export type QuestionMetric =
 
 export type QuestionValues = Record<QuestionField, string>;
 export type QuestionErrors = Partial<Record<QuestionField, string>>;
+export type SurveyVisualValues = {
+  logo_url: string; primary_color: string; secondary_color: string;
+  survey_welcome_text: string; survey_thank_you_text: string; contact_consent_text: string;
+};
+export type SurveyVisualErrors = Partial<Record<keyof SurveyVisualValues, string>>;
 
 export type QuestionsSettingsData = {
   settingsId: string | null;
   restaurantId: string;
   values: QuestionValues;
+  visuals: SurveyVisualValues;
   updatedAt: string | null;
 };
 
@@ -28,6 +34,12 @@ export const DEFAULT_QUESTION_VALUES: QuestionValues = {
   question_attention_text: "¿Cómo calificarías la atención?",
   question_food_text: "¿Cómo calificarías los alimentos o bebidas?",
   question_speed_text: "¿Cómo calificarías la rapidez del servicio?",
+};
+export const DEFAULT_SURVEY_VISUAL_VALUES: SurveyVisualValues = {
+  logo_url: "", primary_color: "#0f766e", secondary_color: "#ea580c",
+  survey_welcome_text: "Gracias por elegirnos. Tu opinión nos ayuda a mejorar cada día.",
+  survey_thank_you_text: "Tu feedback nos ayuda a brindar mejores experiencias cada día.",
+  contact_consent_text: "Acepto que el restaurante me contacte para dar seguimiento a mi experiencia.",
 };
 
 export const QUESTION_DEFINITIONS: ReadonlyArray<{
@@ -48,6 +60,8 @@ type QuestionSettingsRow = Pick<
   | "question_food_text"
   | "question_speed_text"
   | "updated_at"
+  | "logo_url" | "primary_color" | "secondary_color" | "survey_welcome_text"
+  | "survey_thank_you_text" | "contact_consent_text"
 >;
 
 type SupabaseBrowserClient = ReturnType<typeof getSupabaseBrowserClient>;
@@ -69,6 +83,31 @@ export function normalizeQuestionValues(
       settings?.question_speed_text?.trim() ||
       DEFAULT_QUESTION_VALUES.question_speed_text,
   };
+}
+
+export function normalizeSurveyVisualValues(settings: Partial<QuestionSettingsRow> | null): SurveyVisualValues {
+  return Object.fromEntries(Object.entries(DEFAULT_SURVEY_VISUAL_VALUES).map(([key, fallback]) => [
+    key, settings?.[key as keyof QuestionSettingsRow]?.toString().trim() || fallback,
+  ])) as SurveyVisualValues;
+}
+
+export function validateSurveyVisualValues(values: SurveyVisualValues): SurveyVisualErrors {
+  const errors: SurveyVisualErrors = {};
+  if (values.logo_url.trim()) {
+    try { const url = new URL(values.logo_url.trim()); if (url.protocol !== "https:") throw new Error(); }
+    catch { errors.logo_url = "Ingresa una URL absoluta que use https://."; }
+  }
+  for (const field of ["primary_color", "secondary_color"] as const) {
+    if (values[field].trim() && !/^#[0-9a-fA-F]{6}$/.test(values[field].trim()))
+      errors[field] = "Usa un color hexadecimal con formato #RRGGBB.";
+  }
+  return errors;
+}
+
+export function buildSettingsPayload(input: { questions: QuestionValues; visuals: SurveyVisualValues }) {
+  const questions = Object.fromEntries(Object.entries(input.questions).map(([k, v]) => [k, v.trim()])) as QuestionValues;
+  const visuals = Object.fromEntries(Object.entries(input.visuals).map(([k, v]) => [k, v.trim() || null])) as Record<keyof SurveyVisualValues, string | null>;
+  return { ...questions, ...visuals };
 }
 
 export function validateQuestionValues(values: QuestionValues): QuestionErrors {
@@ -105,7 +144,7 @@ export async function loadQuestionsSettingsData(
   const { data: settings, error: settingsError } = await supabase
     .from("restaurant_settings")
     .select(
-      "id, question_general_text, question_attention_text, question_food_text, question_speed_text, updated_at",
+      "id, logo_url, primary_color, secondary_color, survey_welcome_text, survey_thank_you_text, contact_consent_text, question_general_text, question_attention_text, question_food_text, question_speed_text, updated_at",
     )
     .eq("restaurant_id", profile.restaurant_id)
     .order("updated_at", { ascending: false })
@@ -120,6 +159,7 @@ export async function loadQuestionsSettingsData(
     settingsId: settings?.id ?? null,
     restaurantId: profile.restaurant_id,
     values: normalizeQuestionValues(settings ?? null),
+    visuals: normalizeSurveyVisualValues(settings ?? null),
     updatedAt: settings?.updated_at ?? null,
   };
 }
@@ -128,6 +168,7 @@ export async function saveQuestionsSettingsData(
   supabase: SupabaseBrowserClient,
   current: QuestionsSettingsData,
   values: QuestionValues,
+  visuals: SurveyVisualValues,
 ): Promise<QuestionsSettingsData> {
   const normalizedValues = {
     question_general_text: values.question_general_text.trim(),
@@ -142,7 +183,9 @@ export async function saveQuestionsSettingsData(
   }
 
   const updatedAt = new Date().toISOString();
-  const payload = { ...normalizedValues, updated_at: updatedAt };
+  const visualErrors = validateSurveyVisualValues(visuals);
+  if (Object.keys(visualErrors).length) throw new Error("La configuracion visual no es valida.");
+  const payload = { ...buildSettingsPayload({ questions: normalizedValues, visuals }), updated_at: updatedAt };
 
   const result = current.settingsId
     ? await supabase
@@ -165,6 +208,7 @@ export async function saveQuestionsSettingsData(
     settingsId: result.data.id,
     restaurantId: current.restaurantId,
     values: normalizedValues,
+    visuals: normalizeSurveyVisualValues(payload),
     updatedAt: result.data.updated_at ?? updatedAt,
   };
 }

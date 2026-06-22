@@ -28,8 +28,8 @@ const settingsSections = [
     available: true,
   },
   {
-    title: "Preguntas",
-    description: "Configura las preguntas visibles en la encuesta.",
+    title: "Encuesta",
+    description: "Configura branding, textos y preguntas visibles en la encuesta.",
     href: ROUTES.APP_SETTINGS_QUESTIONS,
     icon: CircleHelp,
     available: true,

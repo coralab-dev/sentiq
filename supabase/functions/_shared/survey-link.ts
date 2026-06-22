@@ -4,7 +4,9 @@ import { hashPublicToken, normalizePublicToken } from "./public-token.ts";
 export type SurveySettings = {
   logo_url: string | null;
   primary_color: string | null;
+  secondary_color: string | null;
   survey_welcome_text: string | null;
+  survey_thank_you_text: string | null;
   question_general_text: string | null;
   question_attention_text: string | null;
   question_food_text: string | null;
@@ -66,7 +68,7 @@ export async function getSurveyLinkContext(supabase: SupabaseClient, rawToken: s
   const { data: settings } = await supabase
     .from("restaurant_settings")
     .select(
-      "logo_url,primary_color,survey_welcome_text,question_general_text,question_attention_text,question_food_text,question_speed_text,contact_consent_text",
+      "logo_url,primary_color,secondary_color,survey_welcome_text,survey_thank_you_text,question_general_text,question_attention_text,question_food_text,question_speed_text,contact_consent_text",
     )
     .eq("restaurant_id", link.restaurant_id)
     .maybeSingle();

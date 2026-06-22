@@ -8,6 +8,9 @@ const DEFAULT_QUESTION_ATTENTION = "¿Cómo calificarías la atención?";
 const DEFAULT_QUESTION_FOOD = "¿Cómo calificarías los alimentos o bebidas?";
 const DEFAULT_QUESTION_SPEED = "¿Cómo calificarías la rapidez del servicio?";
 const DEFAULT_CONSENT_TEXT = "Acepto que el restaurante me contacte para dar seguimiento a mi experiencia.";
+const DEFAULT_PRIMARY_COLOR = "#0f766e";
+const DEFAULT_SECONDARY_COLOR = "#ea580c";
+const DEFAULT_THANK_YOU_TEXT = "Tu feedback nos ayuda a brindar mejores experiencias cada día.";
 
 type RequestPayload = {
   token?: unknown;
@@ -42,8 +45,10 @@ Deno.serve(async (req: Request) => {
       restaurant_name: context.restaurant.name,
       branch_name: context.branch.name,
       logo_url: settings?.logo_url ?? null,
-      primary_color: settings?.primary_color ?? null,
+      primary_color: settings?.primary_color ?? DEFAULT_PRIMARY_COLOR,
+      secondary_color: settings?.secondary_color ?? DEFAULT_SECONDARY_COLOR,
       survey_welcome_text: settings?.survey_welcome_text ?? null,
+      survey_thank_you_text: settings?.survey_thank_you_text ?? DEFAULT_THANK_YOU_TEXT,
       question_general_text: settings?.question_general_text ?? DEFAULT_QUESTION_GENERAL,
       question_attention_text: settings?.question_attention_text ?? DEFAULT_QUESTION_ATTENTION,
       question_food_text: settings?.question_food_text ?? DEFAULT_QUESTION_FOOD,

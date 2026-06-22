@@ -23,10 +23,12 @@ import {
   QUESTION_DEFINITIONS,
   saveQuestionsSettingsData,
   validateQuestionValues,
+  validateSurveyVisualValues,
   type QuestionErrors,
   type QuestionField,
   type QuestionsSettingsData,
   type QuestionValues,
+  type SurveyVisualValues,
 } from "./questions-settings-data";
 
 type LoadStatus = "loading" | "success" | "error";
@@ -43,6 +45,7 @@ export function QuestionsSettingsClient() {
   const [loadStatus, setLoadStatus] = useState<LoadStatus>("loading");
   const [settingsData, setSettingsData] = useState<QuestionsSettingsData | null>(null);
   const [values, setValues] = useState<QuestionValues | null>(null);
+  const [visuals, setVisuals] = useState<SurveyVisualValues | null>(null);
   const [errors, setErrors] = useState<QuestionErrors>({});
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
@@ -56,6 +59,7 @@ export function QuestionsSettingsClient() {
       const nextData = await loadQuestionsSettingsData(supabase);
       setSettingsData(nextData);
       setValues(nextData.values);
+      setVisuals(nextData.visuals);
       setErrors({});
       setSaveMessage(null);
       setLoadStatus("success");
@@ -69,7 +73,7 @@ export function QuestionsSettingsClient() {
   }, [loadData]);
 
   const isDirty = useMemo(() => {
-    if (!settingsData || !values) {
+    if (!settingsData || !values || !visuals) {
       return false;
     }
 
@@ -77,9 +81,9 @@ export function QuestionsSettingsClient() {
       !settingsData.settingsId ||
       QUESTION_DEFINITIONS.some(
         ({ field }) => values[field] !== settingsData.values[field],
-      )
+      ) || Object.keys(visuals).some((field) => visuals[field as keyof SurveyVisualValues] !== settingsData.visuals[field as keyof SurveyVisualValues])
     );
-  }, [settingsData, values]);
+  }, [settingsData, values, visuals]);
 
   function updateValue(field: QuestionField, value: string) {
     setValues((current) => (current ? { ...current, [field]: value } : current));
@@ -112,14 +116,15 @@ export function QuestionsSettingsClient() {
   }
 
   async function saveChanges() {
-    if (!settingsData || !values || isSaving) {
+    if (!settingsData || !values || !visuals || isSaving) {
       return;
     }
 
     const nextErrors = validateQuestionValues(values);
+    const visualErrors = validateSurveyVisualValues(visuals);
     setErrors(nextErrors);
 
-    if (Object.keys(nextErrors).length > 0) {
+    if (Object.keys(nextErrors).length > 0 || Object.keys(visualErrors).length > 0) {
       setSaveMessage(null);
       setSaveError("Completa las cuatro preguntas antes de guardar.");
       return;
@@ -134,9 +139,11 @@ export function QuestionsSettingsClient() {
         supabase,
         settingsData,
         values,
+        visuals,
       );
       setSettingsData(nextData);
       setValues(nextData.values);
+      setVisuals(nextData.visuals);
       setSaveMessage("Cambios guardados correctamente.");
     } catch {
       setSaveError(
@@ -156,7 +163,7 @@ export function QuestionsSettingsClient() {
     );
   }
 
-  if (loadStatus === "error" || !settingsData || !values) {
+  if (loadStatus === "error" || !settingsData || !values || !visuals) {
     return (
       <EmptyState
         title="No se pudo cargar la configuracion"
@@ -176,8 +183,8 @@ export function QuestionsSettingsClient() {
     <div className="space-y-6">
       <PageHeader
         eyebrow="Configuracion"
-        title="Configuracion de preguntas"
-        description="Edita los textos visibles sin cambiar las metricas internas de la encuesta."
+        title="Configuración de encuesta"
+        description="Personaliza la apariencia, los textos y las preguntas base."
         actions={
           <Link
             href={ROUTES.APP_SETTINGS}
@@ -189,7 +196,43 @@ export function QuestionsSettingsClient() {
         }
       />
 
+      <SectionCard title="Branding básico">
+        <div className="grid gap-4 md:grid-cols-3">
+          {(["logo_url", "primary_color", "secondary_color"] as const).map((field) => (
+            <label key={field} className="space-y-2 text-sm font-semibold text-slate-900">
+              {field === "logo_url" ? "Logo URL (https://)" : field === "primary_color" ? "Color principal" : "Color secundario"}
+              <input type={field === "logo_url" ? "url" : "color"} value={visuals[field]} onChange={(e) => setVisuals({ ...visuals, [field]: e.target.value })} className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3" />
+            </label>
+          ))}
+        </div>
+      </SectionCard>
+
+      <SectionCard title="Textos de experiencia">
+        <div className="grid gap-4 lg:grid-cols-3">
+          {(["survey_welcome_text", "survey_thank_you_text", "contact_consent_text"] as const).map((field) => (
+            <label key={field} className="space-y-2 text-sm font-semibold text-slate-900">
+              {field === "survey_welcome_text" ? "Bienvenida" : field === "survey_thank_you_text" ? "Agradecimiento" : "Consentimiento"}
+              <textarea rows={4} value={visuals[field]} onChange={(e) => setVisuals({ ...visuals, [field]: e.target.value })} className="w-full rounded-lg border border-slate-200 bg-white p-3 font-normal" />
+            </label>
+          ))}
+        </div>
+      </SectionCard>
+
+      <SectionCard title="Vista previa">
+        <div className="mx-auto max-w-sm overflow-hidden rounded-2xl border bg-white shadow-sm">
+          <div className="p-5 text-white" style={{ backgroundColor: visuals.primary_color }}>
+            {visuals.logo_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={visuals.logo_url} alt="Logo" className="mb-3 size-12 rounded-full bg-white object-cover" />
+            ) : null}
+            <p>{visuals.survey_welcome_text}</p>
+          </div>
+          <div className="space-y-3 p-5">{QUESTION_DEFINITIONS.map(({ field }, i) => <p key={field} className="text-sm font-semibold">{i + 1}. {values[field]}</p>)}<p className="text-xs text-slate-500">{visuals.contact_consent_text}</p><button type="button" className="w-full rounded-lg p-3 font-semibold text-white" style={{ backgroundColor: visuals.secondary_color }}>Enviar respuesta</button><p className="text-center text-sm">{visuals.survey_thank_you_text}</p></div>
+        </div>
+      </SectionCard>
+
       <div className="space-y-4">
+        <h2 className="text-lg font-semibold">Preguntas base</h2>
         {QUESTION_DEFINITIONS.map(({ field, metric }, index) => {
           const error = errors[field];
 

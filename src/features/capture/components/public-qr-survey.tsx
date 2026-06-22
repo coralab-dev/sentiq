@@ -2,7 +2,6 @@
 
 import { Send, Store } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import type { FormEvent, ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -18,7 +17,7 @@ import { ThankYouMessage } from "@/components/feedback/thank-you-message";
 import { ErrorState } from "@/components/shared/error-state";
 import { LoadingState } from "@/components/shared/loading-state";
 import { Button } from "@/components/ui/button";
-import { ROUTES } from "@/config/routes";
+import { getSurveyTheme } from "@/features/capture/survey-theme";
 import type { PublicSurveyConfig, RatingValue } from "@/types/domain";
 
 const INVALID_LINK_MESSAGE = "Este enlace no está disponible. Solicita apoyo al restaurante.";
@@ -62,7 +61,6 @@ const ratingFields = [
 ] as const;
 
 export function PublicQrSurvey({ token }: PublicQrSurveyProps) {
-  const router = useRouter();
   const [config, setConfig] = useState<PublicSurveyConfig | null>(null);
   const [isLoading, setIsLoading] = useState(Boolean(token));
   const [configFailed, setConfigFailed] = useState(false);
@@ -142,7 +140,7 @@ export function PublicQrSurvey({ token }: PublicQrSurveyProps) {
   if (submitted) {
     return (
       <PageShell>
-        <ThankYouMessage mode="qr" className="shadow-sm" />
+        <ThankYouMessage mode="qr" description={config.survey_thank_you_text ?? undefined} className="shadow-sm" />
       </PageShell>
     );
   }
@@ -207,7 +205,6 @@ export function PublicQrSurvey({ token }: PublicQrSurveyProps) {
           : false,
       });
       setSubmitted(true);
-      router.push(`${ROUTES.THANK_YOU}?mode=qr`);
     } catch (error) {
       const status = error instanceof PublicSurveyFunctionError ? error.status : undefined;
       setErrors({
@@ -242,9 +239,10 @@ export function PublicQrSurvey({ token }: PublicQrSurveyProps) {
             <div className="flex items-center gap-4">
               <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-200">
                 <div
-                  className="h-full rounded-full bg-teal-700 transition-all"
+                  className="h-full rounded-full transition-all"
                   style={{
                     width: `${(ratingFields.filter(({ key }) => form[key]).length / ratingFields.length) * 100}%`,
+                    backgroundColor: getSurveyTheme(config).primaryColor,
                   }}
                 />
               </div>
@@ -330,7 +328,8 @@ export function PublicQrSurvey({ token }: PublicQrSurveyProps) {
           type="submit"
           size="lg"
           disabled={isSubmitting}
-          className="h-12 w-full bg-orange-600 text-base font-semibold text-white shadow-sm hover:bg-orange-700"
+          className="h-12 w-full text-base font-semibold text-white shadow-sm"
+          style={{ backgroundColor: getSurveyTheme(config).secondaryColor }}
         >
           <Send className="size-5" aria-hidden="true" />
           {isSubmitting ? "Enviando..." : "Enviar opinión"}
