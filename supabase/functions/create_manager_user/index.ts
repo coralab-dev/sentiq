@@ -53,7 +53,15 @@ Deno.serve(async (req: Request) => {
     const { data: current, error: currentError } = await supabase.from("manager_branch_assignments").select("id,branch_id,status").eq("manager_user_id", managerId).eq("restaurant_id", admin.restaurant_id);
     if (currentError) return fail("server_error", 500);
     const requested = new Set(parsed.value.branch_ids);
-    for (const row of current ?? []) if (!requested.has(row.branch_id) && row.status !== "inactive") await supabase.from("manager_branch_assignments").update({ status: "inactive" }).eq("id", row.id);
+    for (const row of current ?? []) {
+      if (!requested.has(row.branch_id) && row.status !== "inactive") {
+        const { error } = await supabase
+          .from("manager_branch_assignments")
+          .update({ status: "inactive" })
+          .eq("id", row.id);
+        if (error) return fail("server_error", 500);
+      }
+    }
     for (const branchId of parsed.value.branch_ids) {
       const row = (current ?? []).find((item) => item.branch_id === branchId);
       const result = row ? await supabase.from("manager_branch_assignments").update({ status: "active" }).eq("id", row.id) : await supabase.from("manager_branch_assignments").insert({ restaurant_id: admin.restaurant_id, manager_user_id: managerId, branch_id: branchId, status: "active", created_by: admin.id });
