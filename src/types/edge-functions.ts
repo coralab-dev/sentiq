@@ -37,10 +37,19 @@ export type CreateRestaurantAdminRequest = {
 };
 
 export type CreateManagerUserRequest = {
-  restaurant_id: string;
   full_name: string;
   email: string;
   branch_ids: string[];
+  restaurant_id?: string;
+};
+
+export type CreateManagerUserResponse = {
+  ok: true;
+  user_id: string;
+  email: string;
+  status: "active" | "invited";
+  branch_ids: string[];
+  created: boolean;
 };
 
 export type RegenerateQrTokenRequest =
