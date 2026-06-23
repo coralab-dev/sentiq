@@ -64,6 +64,42 @@ export type CreateRestaurantAdminResponse = {
   created: boolean;
 };
 
+export type PlatformActivitySummaryItem = {
+  restaurant_id: string;
+  response_count: number;
+  alert_count: number;
+  pending_alert_count: number;
+  attended_alert_count: number;
+  avg_general_experience: number | null;
+  last_response_at: string | null;
+  last_alert_at: string | null;
+};
+
+export type GetPlatformActivitySummaryRequest = {
+  restaurant_id?: string;
+};
+
+export type GetPlatformActivitySummaryResponse = {
+  ok: true;
+  items: PlatformActivitySummaryItem[];
+};
+
+export type UpdateRestaurantAccountRequest = {
+  restaurant_id: string;
+  plan_code: "demo" | "basico" | "pro" | "custom";
+  account_status: "demo" | "pilot" | "active" | "paused" | "cancelled";
+};
+
+export type UpdateRestaurantAccountResponse = {
+  ok: true;
+  restaurant_id: string;
+  plan_code: UpdateRestaurantAccountRequest["plan_code"];
+  account_status: UpdateRestaurantAccountRequest["account_status"];
+  started_at: string | null;
+  cancelled_at: string | null;
+  updated_at: string;
+};
+
 export type CreateManagerUserRequest = {
   full_name: string;
   email: string;

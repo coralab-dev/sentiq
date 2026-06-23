@@ -3,6 +3,8 @@ export const EDGE_FUNCTIONS = {
   SUBMIT_FEEDBACK: "submit_feedback",
   CREATE_RESTAURANT: "create_restaurant",
   CREATE_RESTAURANT_ADMIN: "create_restaurant_admin",
+  GET_PLATFORM_ACTIVITY_SUMMARY: "get_platform_activity_summary",
+  UPDATE_RESTAURANT_ACCOUNT: "update_restaurant_account",
   CREATE_MANAGER_USER: "create_manager_user",
   REGENERATE_QR_TOKEN: "regenerate_qr_token",
   REGENERATE_DEVICE_TOKEN: "regenerate_device_token",

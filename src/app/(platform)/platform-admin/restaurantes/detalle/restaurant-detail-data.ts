@@ -6,6 +6,8 @@ type BranchRow = { id: string; restaurant_id: string; name: string; slug: string
 type UserRow = { id: string; restaurant_id: string | null; full_name: string; email: string; role: string; status: string; created_at: string; updated_at: string | null };
 type DeviceRow = { restaurant_id: string; status: string; last_used_at: string | null };
 type SurveyLinkRow = { restaurant_id: string; status: string; updated_at: string | null; regenerated_at: string | null };
+type PlatformActivitySummaryItem = { restaurant_id: string; response_count: number; alert_count: number; pending_alert_count: number; attended_alert_count: number; avg_general_experience: number | null; last_response_at: string | null; last_alert_at: string | null };
+type UpdateRestaurantAccountRequest = { restaurant_id: string; plan_code: "demo" | "basico" | "pro" | "custom"; account_status: "demo" | "pilot" | "active" | "paused" | "cancelled" };
 
 export type RestaurantDetailData = {
   restaurant: { id: string; name: string; slug: string; contactEmail: string | null; status: string; createdAt: string; updatedAt: string | null };
@@ -13,6 +15,7 @@ export type RestaurantDetailData = {
   branches: Array<{ id: string; name: string; slug: string; status: string; createdAt: string }>;
   administrators: Array<{ id: string; fullName: string; email: string; status: string; createdAt: string }>;
   aggregates: { branchCount: number; activeBranchCount: number; userCount: number; activeUserCount: number; invitedUserCount: number; deviceCount: number; activeDeviceCount: number; activeSurveyLinkCount: number };
+  activity: { available: boolean; responseCount: number | null; alertCount: number | null; pendingAlertCount: number | null; attendedAlertCount: number | null; avgGeneralExperience: number | null; lastResponseAt: string | null; lastAlertAt: string | null };
   lastActivityAt: string;
 };
 
@@ -37,8 +40,42 @@ export function combineRestaurantDetailData(input: DetailInput): RestaurantDetai
     branches: branches.map((branch) => ({ id: branch.id, name: branch.name, slug: branch.slug, status: branch.status, createdAt: branch.created_at })),
     administrators,
     aggregates: { branchCount: branches.length, activeBranchCount: branches.filter((branch) => branch.status === "active").length, userCount: users.length, activeUserCount: users.filter((user) => user.status === "active").length, invitedUserCount: users.filter((user) => user.status === "invited").length, deviceCount: devices.length, activeDeviceCount: devices.filter((device) => device.status === "active").length, activeSurveyLinkCount: surveyLinks.filter((link) => link.status === "active").length },
+    activity: emptyActivity(),
     lastActivityAt: activityCandidates.sort().at(-1) ?? restaurant.created_at,
   };
+}
+
+export function mergeRestaurantDetailActivitySummary(detail: RestaurantDetailData | null, activity: PlatformActivitySummaryItem | null | undefined): RestaurantDetailData | null {
+  if (!detail) return null;
+  if (!activity || activity.restaurant_id !== detail.restaurant.id) return { ...detail, activity: emptyActivity() };
+  const lastActivityAt = [detail.lastActivityAt, activity.last_response_at, activity.last_alert_at].filter((value): value is string => Boolean(value)).sort().at(-1) ?? detail.lastActivityAt;
+  return {
+    ...detail,
+    activity: {
+      available: true,
+      responseCount: activity.response_count,
+      alertCount: activity.alert_count,
+      pendingAlertCount: activity.pending_alert_count,
+      attendedAlertCount: activity.attended_alert_count,
+      avgGeneralExperience: activity.avg_general_experience,
+      lastResponseAt: activity.last_response_at,
+      lastAlertAt: activity.last_alert_at,
+    },
+    lastActivityAt,
+  };
+}
+
+export function buildUpdateRestaurantAccountPayload(input: { restaurantId: string; planCode: string; accountStatus: string }): UpdateRestaurantAccountRequest {
+  if (!isValidRestaurantId(input.restaurantId)) throw new Error("invalid_restaurant_id");
+  if (!["demo", "basico", "pro", "custom"].includes(input.planCode)) throw new Error("invalid_plan_code");
+  if (!["demo", "pilot", "active", "paused", "cancelled"].includes(input.accountStatus)) throw new Error("invalid_account_status");
+  return { restaurant_id: input.restaurantId, plan_code: input.planCode as UpdateRestaurantAccountRequest["plan_code"], account_status: input.accountStatus as UpdateRestaurantAccountRequest["account_status"] };
+}
+
+async function loadDetailActivitySummary(restaurantId: string): Promise<PlatformActivitySummaryItem | null> {
+  const { invokeFunction } = await import("../../../../../lib/supabase/functions");
+  const response = await invokeFunction<Record<string, unknown>, { ok: true; items: PlatformActivitySummaryItem[] }>("get_platform_activity_summary", { restaurant_id: restaurantId });
+  return response.items[0] ?? null;
 }
 
 export async function loadRestaurantDetailData(supabase: SupabaseClient, restaurantId: string): Promise<RestaurantDetailData | null> {
@@ -55,5 +92,15 @@ export async function loadRestaurantDetailData(supabase: SupabaseClient, restaur
   const error = restaurantResult.error ?? accountResult.error ?? branchesResult.error ?? usersResult.error ?? devicesResult.error ?? linksResult.error;
   if (error) throw error;
 
-  return combineRestaurantDetailData({ restaurant: restaurantResult.data as RestaurantRow | null, account: accountResult.data as AccountRow | null, branches: (branchesResult.data ?? []) as BranchRow[], users: (usersResult.data ?? []) as UserRow[], devices: (devicesResult.data ?? []) as DeviceRow[], surveyLinks: (linksResult.data ?? []) as SurveyLinkRow[] });
+  const detail = combineRestaurantDetailData({ restaurant: restaurantResult.data as RestaurantRow | null, account: accountResult.data as AccountRow | null, branches: (branchesResult.data ?? []) as BranchRow[], users: (usersResult.data ?? []) as UserRow[], devices: (devicesResult.data ?? []) as DeviceRow[], surveyLinks: (linksResult.data ?? []) as SurveyLinkRow[] });
+  if (!detail) return null;
+  try {
+    return mergeRestaurantDetailActivitySummary(detail, await loadDetailActivitySummary(restaurantId));
+  } catch {
+    return mergeRestaurantDetailActivitySummary(detail, null);
+  }
+}
+
+function emptyActivity(): RestaurantDetailData["activity"] {
+  return { available: false, responseCount: null, alertCount: null, pendingAlertCount: null, attendedAlertCount: null, avgGeneralExperience: null, lastResponseAt: null, lastAlertAt: null };
 }

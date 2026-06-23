@@ -12,6 +12,8 @@
     "qa:create-manager-user": "node scripts/qa/create-manager-user.mjs",
     "qa:create-restaurant-admin": "node scripts/qa/create-restaurant-admin.mjs",
     "qa:create-restaurant": "node scripts/qa/create-restaurant.mjs",
+    "qa:get-platform-activity-summary": "node scripts/qa/get-platform-activity-summary.mjs",
+    "qa:update-restaurant-account": "node scripts/qa/update-restaurant-account.mjs",
     "seed:demo": "node scripts/seed-demo.mjs"
   },
   "dependencies": {
