@@ -1,5 +1,6 @@
 import {
   ArrowRight,
+  Building2,
   CircleHelp,
   MapPinned,
   MonitorSmartphone,
@@ -13,6 +14,13 @@ import { StatusBadge } from "@/components/shared";
 import { ROUTES } from "@/config/routes";
 
 const settingsSections = [
+  {
+    title: "Cuenta",
+    description: "Consulta plan, estado y datos basicos de la cuenta del restaurante.",
+    href: ROUTES.APP_SETTINGS_ACCOUNT,
+    icon: Building2,
+    available: true,
+  },
   {
     title: "QR por sucursal",
     description: "Consulta y regenera el enlace QR publico de cada sucursal.",

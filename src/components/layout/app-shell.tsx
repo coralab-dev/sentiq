@@ -69,6 +69,10 @@ function getShellTitle(pathname: string): string {
     return "Exportar";
   }
 
+  if (isActiveNavigationItem(pathname, ROUTES.APP_SETTINGS_ACCOUNT)) {
+    return "Cuenta";
+  }
+
   if (isActiveNavigationItem(pathname, ROUTES.APP_SETTINGS)) {
     return "Configuracion";
   }

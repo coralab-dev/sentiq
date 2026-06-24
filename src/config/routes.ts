@@ -17,6 +17,7 @@ export const ROUTES = {
   APP_ALERT_DETAIL: "/app/alertas/detalle",
   APP_EXPORT: "/app/exportar",
   APP_SETTINGS: "/app/configuracion",
+  APP_SETTINGS_ACCOUNT: "/app/configuracion/cuenta",
   APP_SETTINGS_QR: "/app/configuracion/qr",
   APP_SETTINGS_DEVICES: "/app/configuracion/dispositivos",
   APP_SETTINGS_QUESTIONS: "/app/configuracion/preguntas",
