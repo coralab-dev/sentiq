@@ -20,7 +20,7 @@ const featureItems = [
   },
   {
     icon: TrendingUp,
-    title: "Senales operativas",
+    title: "Señales operativas",
     body: "Identifica patrones y oportunidades.",
   },
   {
@@ -33,9 +33,9 @@ const featureItems = [
 const navItems = [
   { icon: Home, label: "Resumen", active: true },
   { icon: MessageSquareText, label: "Opiniones" },
-  { icon: TrendingUp, label: "Senales" },
+  { icon: TrendingUp, label: "Señales" },
   { icon: CheckCircle2, label: "Acciones" },
-  { icon: BarChart3, label: "Reportes" },
+  { icon: BarChart3, label: "Exportación" },
 ];
 
 const summaryItems = [
@@ -46,7 +46,7 @@ const summaryItems = [
     tone: "teal",
   },
   {
-    label: "Senales",
+    label: "Señales",
     helper: "A revisar",
     icon: TrendingUp,
     tone: "sky",
@@ -83,17 +83,17 @@ const recentItems = [
 const flowItems = [
   {
     icon: MessageSquareText,
-    title: "Se recibe la opinion",
+    title: "Se recibe la opinión",
     body: "Cliente comparte su experiencia.",
   },
   {
     icon: TrendingUp,
-    title: "Se detecta la senal",
+    title: "Se detecta la señal",
     body: "El sistema identifica lo importante.",
   },
   {
     icon: CheckCircle2,
-    title: "Se toma accion",
+    title: "Se toma acción",
     body: "El equipo responde y da seguimiento.",
   },
   {
@@ -115,23 +115,27 @@ function getToneClass(tone: string) {
   return "bg-teal-400/15 text-teal-300";
 }
 
+function getRecentMeta(title: string) {
+  return title === "Seguimiento completado" ? "Hoy · Barra" : "Hoy · Comedor";
+}
+
 export default function PublicHomePage() {
   return (
     <main className="min-h-screen overflow-hidden bg-slate-50 text-slate-950">
       <section className="relative isolate min-h-screen">
-        <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,#f8fafc_0%,#f8fafc_47%,#0f172a_47%,#0f172a_100%)]" />
-        <div className="absolute left-0 top-0 -z-10 h-full w-[47%] bg-[radial-gradient(circle_at_18%_18%,rgba(20,184,166,0.12),transparent_28%),linear-gradient(180deg,rgba(255,255,255,0.92),rgba(241,245,249,0.78))]" />
-        <div className="absolute right-0 top-[92px] -z-10 h-[calc(100%-92px)] w-[53%] bg-[radial-gradient(circle_at_42%_12%,rgba(14,165,233,0.22),transparent_28%),radial-gradient(circle_at_78%_78%,rgba(20,184,166,0.24),transparent_32%),linear-gradient(135deg,#0f172a,#082f49_52%,#134e4a)]" />
+        <div className="absolute inset-0 -z-10 bg-slate-50 lg:bg-[linear-gradient(90deg,#f8fafc_0%,#f8fafc_47%,#0f172a_47%,#0f172a_100%)]" />
+        <div className="absolute left-0 top-0 -z-10 h-full w-full bg-[radial-gradient(circle_at_18%_18%,rgba(20,184,166,0.12),transparent_28%),linear-gradient(180deg,rgba(255,255,255,0.92),rgba(241,245,249,0.78))] lg:w-[47%]" />
+        <div className="absolute right-0 top-[100px] -z-10 hidden h-[calc(100%-100px)] w-[53%] bg-[radial-gradient(circle_at_42%_12%,rgba(14,165,233,0.22),transparent_28%),radial-gradient(circle_at_78%_78%,rgba(20,184,166,0.24),transparent_32%),linear-gradient(135deg,#0f172a,#082f49_52%,#134e4a)] lg:block" />
 
-        <header className="flex h-[100px] items-center justify-between border-b border-slate-200 bg-white/90 px-6 backdrop-blur sm:px-10 lg:px-[92px]">
-          <Link href="/" className="text-3xl font-semibold tracking-normal">
+        <header className="flex min-h-[88px] flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white/90 px-4 py-4 backdrop-blur sm:h-[100px] sm:px-10 sm:py-0 lg:px-[92px]">
+          <Link href="/" className="text-2xl font-semibold tracking-normal sm:text-3xl">
             SentiQ
           </Link>
-          <nav className="flex items-center gap-4 text-sm font-medium">
+          <nav className="flex flex-wrap items-center justify-end gap-2 text-sm font-medium sm:gap-4">
             <Link
               className={buttonVariants({
                 variant: "ghost",
-                className: "text-slate-800 hover:bg-slate-100",
+                className: "px-2 text-slate-800 hover:bg-slate-100 sm:px-2.5",
               })}
               href="/privacidad"
             >
@@ -141,23 +145,23 @@ export default function PublicHomePage() {
               className={buttonVariants({
                 size: "lg",
                 className:
-                  "h-12 bg-teal-700 px-8 text-white hover:bg-teal-800 focus-visible:ring-teal-600/25",
+                  "h-10 bg-teal-700 px-4 text-white hover:bg-teal-800 focus-visible:ring-teal-600/25 sm:h-12 sm:px-8",
               })}
               href="/login"
             >
-              Iniciar sesion
+              Iniciar sesión
             </Link>
           </nav>
         </header>
 
-        <div className="grid min-h-[calc(100vh-100px)] lg:grid-cols-[47%_53%]">
+        <div className="grid min-h-[calc(100vh-88px)] sm:min-h-[calc(100vh-100px)] lg:grid-cols-[47%_53%]">
           <div className="flex flex-col justify-center px-6 py-10 sm:px-10 lg:px-[92px]">
             <div className="mb-9 flex items-center gap-4 text-lg font-medium text-teal-900">
               <span className="h-px w-16 bg-teal-800" />
-              <span>Demo publica · Fase 2</span>
+              <span>Demo pública · Fase 2</span>
             </div>
 
-            <h1 className="max-w-[620px] text-[64px] font-semibold leading-[1.04] tracking-normal text-slate-950 sm:text-[72px] xl:text-[80px]">
+            <h1 className="max-w-[620px] text-[46px] font-semibold leading-[1.04] tracking-normal text-slate-950 sm:text-[72px] xl:text-[80px]">
               Feedback para restaurantes
             </h1>
 
@@ -170,11 +174,11 @@ export default function PublicHomePage() {
                 className={buttonVariants({
                   size: "lg",
                   className:
-                    "h-14 bg-teal-700 px-8 text-base text-white hover:bg-teal-800 focus-visible:ring-teal-600/25",
+                    "h-12 bg-teal-700 px-6 text-base text-white hover:bg-teal-800 focus-visible:ring-teal-600/25 sm:h-14 sm:px-8",
                 })}
                 href="/login"
               >
-                Iniciar sesion
+                Iniciar sesión
                 <ArrowRight className="size-5" />
               </Link>
               <Link
@@ -216,7 +220,7 @@ export default function PublicHomePage() {
             </div>
           </div>
 
-          <div className="relative min-h-[calc(100vh-100px)] overflow-hidden px-6 py-10 sm:px-10 lg:px-0">
+          <div className="relative min-h-[620px] overflow-hidden px-6 py-10 sm:min-h-[calc(100vh-100px)] sm:px-10 lg:px-0">
             <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(15,23,42,0.24),rgba(15,23,42,0.74)),radial-gradient(ellipse_at_28%_30%,rgba(236,253,245,0.46),transparent_19%),radial-gradient(ellipse_at_21%_56%,rgba(15,118,110,0.42),transparent_16%),radial-gradient(ellipse_at_68%_16%,rgba(148,163,184,0.34),transparent_24%),linear-gradient(90deg,rgba(15,23,42,0.18)_1px,transparent_1px),linear-gradient(0deg,rgba(15,23,42,0.16)_1px,transparent_1px),linear-gradient(135deg,#e0f2fe_0%,#0f766e_31%,#0f172a_62%,#042f2e_100%)] bg-[length:auto,auto,auto,auto,56px_56px,56px_56px,auto]" />
             <div className="absolute bottom-0 right-0 h-[32%] w-full bg-[linear-gradient(8deg,rgba(15,23,42,0.92),rgba(15,118,110,0.58)_52%,transparent_53%),repeating-linear-gradient(92deg,rgba(255,255,255,0.14)_0_2px,transparent_2px_118px)]" />
 
@@ -261,7 +265,7 @@ export default function PublicHomePage() {
                         Resumen operativo
                       </h2>
                       <p className="mt-2 text-sm text-slate-400">
-                        Vista general de lo que esta pasando.
+                        Vista general de lo que está pasando.
                       </p>
                     </div>
                     <ShieldCheck className="size-5 text-sky-300" />
@@ -291,7 +295,7 @@ export default function PublicHomePage() {
                   </div>
 
                   <div className="mt-5 rounded-lg border border-white/10 bg-white/[0.03] p-4">
-                    <p className="font-semibold">Lo mas reciente</p>
+                    <p className="font-semibold">Lo más reciente</p>
                     <div className="mt-4 divide-y divide-white/10">
                       {recentItems.map((item) => {
                         const Icon = item.icon;
@@ -311,7 +315,7 @@ export default function PublicHomePage() {
                                 {item.title}
                               </p>
                               <p className="mt-1 text-xs text-slate-400">
-                                {item.meta}
+                                {getRecentMeta(item.title)}
                               </p>
                             </div>
                             <ChevronRight className="size-4 text-slate-500" />
