@@ -6,7 +6,11 @@ SentiQ is deployed as a static Next.js export on Cloudflare Pages.
 
 - Build command: `pnpm build`
 - Output directory: `out`
+- Root directory: repository root (`""`)
 - Node version: `20`
+- pnpm version: `10.15.1`
+- Production branch: `master`
+- Production URL: `https://sentiq.pages.dev`
 
 ## Environment Variables
 
@@ -16,6 +20,8 @@ Configure these public frontend variables in Cloudflare Pages:
 NEXT_PUBLIC_APP_URL=https://sentiq.pages.dev
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
+NODE_VERSION=20
+PNPM_VERSION=10.15.1
 ```
 
 Do not configure `SUPABASE_SERVICE_ROLE_KEY` or any other server-side secret in
@@ -43,3 +49,23 @@ requiring dynamic Next.js routes:
 
 Security headers are defined in `public/_headers`. The deployment intentionally
 does not add a strict CSP yet.
+
+## T-042 / COR-111 verification
+
+Last verified: 2026-06-24.
+
+- Cloudflare Pages project: `sentiq`.
+- Source: GitHub `coralab-dev/sentiq`.
+- Latest production deployment checked: successful.
+- Build command checked: `pnpm build`.
+- Output directory checked: `out`.
+- Root directory checked: repository root.
+- Public variables checked: `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_SUPABASE_URL`,
+  `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NODE_VERSION`, `PNPM_VERSION`.
+- Backend secrets checked as absent from Cloudflare Pages variables:
+  `SUPABASE_SERVICE_ROLE_KEY`, rate-limit salts, token secrets.
+- `public/_redirects` checked in repository and verified in production with
+  `/s/:token` and `/d/:token`.
+- `public/_headers` checked in repository and verified in production on
+  `/app/dashboard/` with `x-content-type-options`, `referrer-policy`,
+  `permissions-policy`, and `x-frame-options`.
