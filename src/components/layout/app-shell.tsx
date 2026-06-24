@@ -73,6 +73,10 @@ function getShellTitle(pathname: string): string {
     return "Cuenta";
   }
 
+  if (isActiveNavigationItem(pathname, ROUTES.APP_SETTINGS_WAITERS)) {
+    return "Meseros";
+  }
+
   if (isActiveNavigationItem(pathname, ROUTES.APP_SETTINGS)) {
     return "Configuracion";
   }

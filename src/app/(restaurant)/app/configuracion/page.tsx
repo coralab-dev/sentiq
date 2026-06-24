@@ -5,6 +5,7 @@ import {
   MapPinned,
   MonitorSmartphone,
   QrCode,
+  UserRound,
   Users,
 } from "lucide-react";
 import Link from "next/link";
@@ -19,6 +20,13 @@ const settingsSections = [
     description: "Consulta plan, estado y datos basicos de la cuenta del restaurante.",
     href: ROUTES.APP_SETTINGS_ACCOUNT,
     icon: Building2,
+    available: true,
+  },
+  {
+    title: "Meseros",
+    description: "Gestiona meseros internos para futuras mediciones por atencion.",
+    href: ROUTES.APP_SETTINGS_WAITERS,
+    icon: UserRound,
     available: true,
   },
   {
