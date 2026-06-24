@@ -1,7 +1,7 @@
 import { ROUTES } from "@/config/routes";
 import type { UserProfile, UserRole } from "@/types/domain";
 
-import { canAccessRoute, isValidUserRole } from "./permissions";
+import { canAccessRoute, isRouteOrSubroute, isValidUserRole } from "./permissions";
 
 export function getPostLoginRedirect(role: UserRole | null | undefined): string {
   if (role === "platform_admin") {
@@ -35,6 +35,14 @@ export function getUnauthorizedRedirect(
 
   if (canAccessRoute(role, pathname)) {
     return null;
+  }
+
+  if (isRouteOrSubroute(pathname, ROUTES.PLATFORM_ADMIN)) {
+    if (role === "restaurant_admin" || role === "manager") {
+      return ROUTES.APP_DASHBOARD;
+    }
+
+    return ROUTES.PLATFORM_ADMIN_NO_ACCESS;
   }
 
   if (role === "platform_admin") {
