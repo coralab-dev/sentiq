@@ -195,7 +195,7 @@ export function PublicDeviceSurvey({ token }: PublicDeviceSurveyProps) {
 
     for (const { key } of ratingFields) {
       if (!isRatingValue(form[key])) {
-        nextErrors[key] = "Selecciona una calificacion del 1 al 5.";
+        nextErrors[key] = "Selecciona una calificación del 1 al 5.";
       }
     }
 
