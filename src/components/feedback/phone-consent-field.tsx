@@ -16,8 +16,8 @@ type PhoneConsentFieldProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type"
 };
 
 export function PhoneConsentField({
-  label = "Telefono para seguimiento",
-  helperText = "Opcional. Si lo compartes y autorizas el contacto, el restaurante podra usarlo solo para dar seguimiento a tu comentario.",
+  label = "Teléfono para seguimiento",
+  helperText = "Opcional. Si lo compartes y autorizas el contacto, el restaurante podrá usarlo solo para dar seguimiento a tu comentario.",
   error,
   consentText,
   consent,

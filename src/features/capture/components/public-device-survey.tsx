@@ -20,7 +20,7 @@ import {
 import type { PublicSurveyConfig, RatingValue } from "@/types/domain";
 import { getSurveyTheme } from "@/features/capture/survey-theme";
 
-const INVALID_LINK_MESSAGE = "Este enlace no esta disponible. Solicita apoyo al restaurante.";
+const INVALID_LINK_MESSAGE = "Este enlace no está disponible. Solicita apoyo al restaurante.";
 const COMMENT_MAX_LENGTH = 500;
 const PHONE_MIN_DIGITS = 8;
 const PHONE_MAX_DIGITS = 15;
@@ -166,7 +166,7 @@ export function PublicDeviceSurvey({ token }: PublicDeviceSurveyProps) {
       <PageShell>
         <ThankYouMessage
           mode="device"
-          title="Gracias por tu opinion"
+          title="Gracias por tu opinión"
           description={config.survey_thank_you_text ?? undefined}
           actionLabel="Nueva encuesta"
           onAction={resetSurvey}
@@ -200,17 +200,17 @@ export function PublicDeviceSurvey({ token }: PublicDeviceSurveyProps) {
     }
 
     if (form.comment.length > COMMENT_MAX_LENGTH) {
-      nextErrors.comment = "El comentario debe tener maximo 500 caracteres.";
+      nextErrors.comment = "El comentario debe tener máximo 500 caracteres.";
     }
 
     const normalizedPhone = normalizePhoneDigits(form.customer_phone);
 
     if (normalizedPhone && !isReasonablePhoneNumber(normalizedPhone)) {
-      nextErrors.customer_phone = "Ingresa un telefono valido de 8 a 15 digitos.";
+      nextErrors.customer_phone = "Ingresa un teléfono válido de 8 a 15 dígitos.";
     }
 
     if (normalizedPhone && !form.consent_to_contact) {
-      nextErrors.consent_to_contact = "Autoriza el contacto para poder dejar tu telefono.";
+      nextErrors.consent_to_contact = "Autoriza el contacto para poder dejar tu teléfono.";
     }
 
     return nextErrors;
@@ -248,8 +248,8 @@ export function PublicDeviceSurvey({ token }: PublicDeviceSurveyProps) {
       setErrors({
         submit:
           status === 429
-            ? "Recibimos varias respuestas recientemente. Intenta de nuevo mas tarde."
-            : "No pudimos enviar tu opinion. Intenta de nuevo en unos segundos.",
+            ? "Recibimos varias respuestas recientemente. Intenta de nuevo más tarde."
+            : "No pudimos enviar tu opinión. Intenta de nuevo en unos segundos.",
       });
     } finally {
       setIsSubmitting(false);
@@ -292,11 +292,11 @@ export function PublicDeviceSurvey({ token }: PublicDeviceSurveyProps) {
           <div className="space-y-4 px-5 py-5 text-center md:px-8">
             <div>
               <h2 className="text-2xl font-semibold text-slate-950">
-                Cuentanos sobre tu experiencia
+                Cuéntanos sobre tu experiencia
               </h2>
               <p className="mt-2 text-base leading-7 text-slate-600">
                 {config.survey_welcome_text ??
-                  "Tu opinion nos ayuda a seguir mejorando cada dia."}
+                  "Tu opinión nos ayuda a seguir mejorando cada día."}
               </p>
             </div>
             <div className="flex items-center gap-4">
@@ -353,7 +353,7 @@ export function PublicDeviceSurvey({ token }: PublicDeviceSurveyProps) {
                 setErrors((current) => ({ ...current, comment: undefined, submit: undefined }));
               }}
               className="min-h-28 w-full resize-y rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-950 shadow-sm transition placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-teal-600/20 disabled:cursor-not-allowed disabled:opacity-60"
-              placeholder="Cuentanos algo mas (opcional)"
+              placeholder="Cuéntanos algo más (opcional)"
             />
             <div className="mt-1 flex items-center justify-between gap-3 text-xs">
               <span className="text-red-600">{errors.comment}</span>
@@ -367,7 +367,7 @@ export function PublicDeviceSurvey({ token }: PublicDeviceSurveyProps) {
             <PhoneConsentField
               value={form.customer_phone}
               disabled={isSubmitting}
-              label="Telefono para seguimiento (opcional)"
+              label="Teléfono para seguimiento (opcional)"
               consentText={config.contact_consent_text}
               consent={form.consent_to_contact}
               error={errors.customer_phone}
@@ -414,7 +414,7 @@ export function PublicDeviceSurvey({ token }: PublicDeviceSurveyProps) {
         </Button>
 
         <div className="flex flex-col items-center justify-center gap-3 px-2 text-center text-sm leading-6 text-slate-500 sm:flex-row">
-          <p>Esta pantalla se reiniciara automaticamente despues de enviar.</p>
+          <p>Esta pantalla se reiniciará automáticamente después de enviar.</p>
           <button
             type="button"
             className="inline-flex items-center gap-1.5 font-medium text-teal-800 underline-offset-4 hover:underline"
