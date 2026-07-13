@@ -2,7 +2,7 @@
 
 Date: 2026-07-13
 
-Commit SHA audited: `5001b6a` plus local uncommitted COR-133 fixes.
+Commit SHA audited: `6ef0fd8ee0bc8d92e3de21cee5075112076328f8`.
 
 Environment audited:
 - Local repository: `C:\Users\balam\Documents\sentiq`
@@ -97,7 +97,7 @@ Reviewed public frontend configuration, public static build output, public captu
 | Cloudflare framing `/app/` | PASS | Production has `x-frame-options: DENY`. |
 | Cloudflare framing `/platform-admin/` | PASS | Production has `x-frame-options: DENY`. |
 | HSTS | BLOCKED/PENDING DEPLOY | Local `_headers` now adds `Strict-Transport-Security: max-age=31536000`; production does not show it yet. |
-| Broader framing | BLOCKED/PENDING DEPLOY | Local `_headers` now applies `X-Frame-Options: DENY` globally; production currently applies it only on app/admin paths. |
+| Broader framing | BLOCKED/PENDING DEPLOY | Local `_headers` applies `X-Frame-Options: DENY` globally. Decision: keep global DENY because QR/device surveys are expected to load as direct public pages and no current embedding/iframe requirement was found in `src`, `public`, or reviewed docs. Production currently applies DENY only on app/admin paths. |
 | CSP | BLOCKED / FOLLOW-UP | Not added. A strict CSP could break static Next.js chunks, inline styles, images, or Supabase connections without browser validation after deploy. |
 | Cloudflare Pages env vars | BLOCKED | No read-only dashboard/API access was available in this session. Must manually verify names only: `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NODE_VERSION`, `PNPM_VERSION`; backend secrets absent. |
 
@@ -145,6 +145,11 @@ Observed production headers:
 Local repository update:
 - `public/_headers` now also sets `X-Frame-Options: DENY` globally.
 - `public/_headers` now sets `Strict-Transport-Security: max-age=31536000`.
+
+Framing decision:
+- Keep global `X-Frame-Options: DENY`.
+- Rationale: public QR/device surveys are direct navigation flows, not embedded widgets. A repository search found no current iframe/embedding requirement for `/s` or `/d`.
+- If a future restaurant widget or partner embedding requirement appears, limit DENY back to `/app/*` and `/platform-admin/*` and use an explicitly tested CSP `frame-ancestors` allowlist for the embedded public routes.
 
 Not adopted:
 - CSP. Recommendation: define a report-only CSP first, validate static Next.js chunks, Supabase function/API calls, images/logos, and styles in production or preview, then graduate to enforcing CSP.
@@ -199,4 +204,3 @@ No values were printed in this document.
 5. Verify production headers again on `/`, `/s/<invalid>`, `/d/<invalid>`, `/app/`, and `/platform-admin/`.
 6. Verify Cloudflare Pages variables in dashboard/API and record names only.
 7. Add or provide safe inactive link/entity fixtures, or explicitly accept those cases as manually verified elsewhere.
-
