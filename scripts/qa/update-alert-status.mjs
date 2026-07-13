@@ -83,7 +83,7 @@ async function main() {
     },
   });
 
-  assertFunctionError(managerForbiddenResult, 404, "not_found_or_forbidden", "manager forbidden update");
+  assertFunctionError(managerForbiddenResult, 404, "not_found", "manager forbidden update");
 
   const invalidPayloadResult = await invokeUpdateAlertStatus({
     accessToken: manager.session.access_token,

@@ -46,6 +46,62 @@ const ALLOWED_SENSITIVE_KEYS_BY_FUNCTION = {
   submit_feedback: new Set(["response_id"]),
 };
 
+const TECHNICAL_LEAK_PATTERNS = [
+  /\bstack\b/i,
+  /stacktrace/i,
+  /\btrace\b/i,
+  /PostgrestError/i,
+  /postgres/i,
+  /\brelation\b/i,
+  /\bschema\b/i,
+  /\bcolumn\b/i,
+  /\bpolicy\b/i,
+  /SUPABASE_SERVICE_ROLE_KEY/i,
+  /service_role/i,
+  /token_hash/i,
+  /source_mismatch/i,
+  /token_required/i,
+  /invalid_source/i,
+  /invalid_general_experience/i,
+  /invalid_service_attention/i,
+  /invalid_food_quality/i,
+  /invalid_service_speed/i,
+  /comment_too_long/i,
+  /phone_too_long/i,
+  /customer_phone_requires_consent/i,
+  /get_public_survey_config/i,
+  /submit_feedback/i,
+  /create_restaurant/i,
+  /create_restaurant_admin/i,
+  /get_platform_activity_summary/i,
+  /update_restaurant_account/i,
+  /create_manager_user/i,
+  /regenerate_qr_token/i,
+  /regenerate_device_token/i,
+  /update_alert_status/i,
+  /export_feedback_csv/i,
+];
+
+const ALLOWED_ERROR_CODES = new Set([
+  "invalid_method",
+  "invalid_payload",
+  "invalid_token",
+  "inactive_link",
+  "inactive_restaurant",
+  "inactive_branch",
+  "inactive_device",
+  "rate_limited",
+  "unauthorized",
+  "forbidden",
+  "not_found",
+  "server_error",
+  "slug_conflict",
+  "restaurant_not_found",
+  "email_conflict",
+  "admin_exists",
+  "branch_not_found",
+]);
+
 loadEnv(".env");
 loadEnv(".env.local");
 
@@ -123,6 +179,7 @@ async function main() {
       const result = await invoke(functionName, { body: noJwtPayload(functionName) });
       assert(result.status === 401, `${functionName} without JWT returned ${result.status}`);
       assertControlledError(result.body);
+      assertAllowedErrorCode(functionName, result.body);
       assertNoSensitiveKeys(functionName, result.body);
     }
   });
@@ -132,6 +189,7 @@ async function main() {
       const result = await invoke(functionName, { body: {} });
       assert([400, 404].includes(result.status), `${functionName} public invalid call returned ${result.status}`);
       assertControlledError(result.body);
+      assertAllowedErrorCode(functionName, result.body);
       assertNoSensitiveKeys(functionName, result.body);
     }
   });
@@ -223,6 +281,7 @@ async function runSubmitFeedbackChecks() {
     });
     assertStatus(result, 400);
     assertControlledError(result.body);
+    assertNoSensitiveKeys("submit_feedback", result.body);
   });
 
   await step("submit_feedback", "rejects phone without consent", async () => {
@@ -231,6 +290,7 @@ async function runSubmitFeedbackChecks() {
     });
     assertStatus(result, 400);
     assertControlledError(result.body);
+    assertNoSensitiveKeys("submit_feedback", result.body);
   });
 
   await step("submit_feedback", "rejects long comment", async () => {
@@ -239,6 +299,15 @@ async function runSubmitFeedbackChecks() {
     });
     assertStatus(result, 400);
     assertControlledError(result.body);
+    assertNoSensitiveKeys("submit_feedback", result.body);
+  });
+
+  await step("submit_feedback", "rejects source mismatch with generic invalid payload", async () => {
+    const result = await invoke("submit_feedback", {
+      body: { ...validFeedback(fixture.qrToken, "device"), comment: "QA T063 source mismatch" },
+    });
+    assertErrorCode(result, 400, "invalid_payload");
+    assertNoSensitiveKeys("submit_feedback", result.body);
   });
 
   await step("submit_feedback", "accepts valid QR feedback and returns minimal response", async () => {
@@ -683,7 +752,13 @@ function assertOk(result, label) {
 
 function assertControlledError(body) {
   assert(body && typeof body === "object" && "error" in body, `missing controlled error body: ${JSON.stringify(body)}`);
+  assertAllowedErrorCode("error", body);
   assertNoTechnicalLeak("error", body);
+}
+
+function assertAllowedErrorCode(functionName, body) {
+  const code = typeof body?.error === "string" ? body.error : body?.error?.code;
+  assert(ALLOWED_ERROR_CODES.has(code), `${functionName} returned uncontrolled error code ${code ?? JSON.stringify(body)}`);
 }
 
 function assertNoSensitiveKeys(functionName, value) {
@@ -708,8 +783,8 @@ function collectSensitiveKeys(value, allowed, offenders, path = "") {
 
 function assertNoTechnicalLeak(functionName, body) {
   const serialized = typeof body === "string" ? body : JSON.stringify(body ?? "");
-  for (const marker of ["stack", "trace", "PostgrestError", "SUPABASE_SERVICE_ROLE_KEY", "service_role"]) {
-    assert(!serialized.includes(marker), `${functionName} leaked technical marker ${marker}`);
+  for (const pattern of TECHNICAL_LEAK_PATTERNS) {
+    assert(!pattern.test(serialized), `${functionName} leaked technical marker ${pattern.source}`);
   }
 }
 

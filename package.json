@@ -10,6 +10,7 @@
     "check": "pnpm lint && pnpm typecheck && pnpm build",
     "qa:update-alert-status": "node scripts/qa/update-alert-status.mjs",
     "qa:edge-functions-privacy": "node scripts/qa/edge-functions-privacy-checklist.mjs",
+    "qa:public-build": "node scripts/qa/public-build-audit.mjs",
     "qa:create-manager-user": "node scripts/qa/create-manager-user.mjs",
     "qa:create-restaurant-admin": "node scripts/qa/create-restaurant-admin.mjs",
     "qa:create-restaurant": "node scripts/qa/create-restaurant.mjs",

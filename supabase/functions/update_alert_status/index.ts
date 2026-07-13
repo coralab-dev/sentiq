@@ -25,8 +25,8 @@ type FeedbackAlert = {
 type UpdateAlertStatusErrorCode =
   | "invalid_payload"
   | "unauthorized"
-  | "not_found_or_forbidden"
-  | "method_not_allowed"
+  | "not_found"
+  | "invalid_method"
   | "server_error";
 
 const UUID_PATTERN =
@@ -38,7 +38,7 @@ Deno.serve(async (req: Request) => {
   if (optionsResponse) return optionsResponse;
 
   if (req.method !== "POST") {
-    return controlledError("method_not_allowed", 405);
+    return controlledError("invalid_method", 405);
   }
 
   const body = (await readJsonBody(req)) as RequestPayload | null;
@@ -81,7 +81,7 @@ Deno.serve(async (req: Request) => {
     );
 
     if (!hasPermission) {
-      return controlledError("not_found_or_forbidden", 404);
+      return controlledError("not_found", 404);
     }
 
     if (alertResult.alert.status === "attended") {
@@ -203,11 +203,11 @@ async function getActiveProfile(
   }
 
   if (profile.role !== "restaurant_admin" && profile.role !== "manager") {
-    return { ok: false, code: "not_found_or_forbidden", status: 404 };
+    return { ok: false, code: "not_found", status: 404 };
   }
 
   if (!profile.restaurant_id) {
-    return { ok: false, code: "not_found_or_forbidden", status: 404 };
+    return { ok: false, code: "not_found", status: 404 };
   }
 
   return { ok: true, profile };
@@ -231,7 +231,7 @@ async function getFeedbackAlert(
   }
 
   if (!alert) {
-    return { ok: false, code: "not_found_or_forbidden", status: 404 };
+    return { ok: false, code: "not_found", status: 404 };
   }
 
   return { ok: true, alert };

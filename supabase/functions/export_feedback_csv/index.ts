@@ -74,8 +74,8 @@ type FeedbackAlert = {
 type ExportFeedbackCsvErrorCode =
   | "invalid_payload"
   | "unauthorized"
-  | "not_found_or_forbidden"
-  | "method_not_allowed"
+  | "not_found"
+  | "invalid_method"
   | "server_error";
 
 const UUID_PATTERN =
@@ -104,7 +104,7 @@ Deno.serve(async (req: Request) => {
   if (optionsResponse) return optionsResponse;
 
   if (req.method !== "POST") {
-    return controlledError("method_not_allowed", 405);
+    return controlledError("invalid_method", 405);
   }
 
   const body = (await readJsonBody(req)) as RequestPayload | null;
@@ -283,11 +283,11 @@ async function getActiveProfile(
   }
 
   if (profile.role !== "restaurant_admin" && profile.role !== "manager") {
-    return { ok: false, code: "not_found_or_forbidden", status: 404 };
+    return { ok: false, code: "not_found", status: 404 };
   }
 
   if (!profile.restaurant_id) {
-    return { ok: false, code: "not_found_or_forbidden", status: 404 };
+    return { ok: false, code: "not_found", status: 404 };
   }
 
   return { ok: true, profile: profile as UserProfile & { restaurant_id: string } };
@@ -318,7 +318,7 @@ async function resolveBranchScope(
     }
 
     if (!branch) {
-      return { ok: false, code: "not_found_or_forbidden", status: 404 };
+      return { ok: false, code: "not_found", status: 404 };
     }
 
     return { ok: true, branchIds: [requestedBranchId] };
@@ -344,7 +344,7 @@ async function resolveBranchScope(
   );
 
   if (requestedBranchId && branchIds.length === 0) {
-    return { ok: false, code: "not_found_or_forbidden", status: 404 };
+    return { ok: false, code: "not_found", status: 404 };
   }
 
   return { ok: true, branchIds };
