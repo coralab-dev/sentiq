@@ -1,16 +1,21 @@
 # T-063 Public Config And Errors Audit
 
-Date: 2026-07-13
+Date: 2026-07-14
 
-Commit SHA audited: `6ef0fd8ee0bc8d92e3de21cee5075112076328f8`.
+Commit SHA audited before merge: `6ef0fd8ee0bc8d92e3de21cee5075112076328f8`.
+
+Deployed merge SHA validated: `b53f6b126e425e8c9747e9e1b95c1c9d53f4aacd`.
+
+Production validation time: 2026-07-14 00:18 UTC.
 
 Environment audited:
 - Local repository: `C:\Users\balam\Documents\sentiq`
 - Local static build: `out/`
 - Production frontend: `https://sentiq.pages.dev`
+- Production Supabase project: `sentiq` / `wdurjrzkfjnlaatenwnb`
 - Remote Supabase Edge Functions via `pnpm qa:edge-functions-privacy`
 
-Dictamen final: `BLOCKED`
+Dictamen final: `PASS WITH CAVEATS`
 
 ## Scope
 
@@ -40,66 +45,70 @@ Reviewed public frontend configuration, public static build output, public captu
 - `supabase/functions/export_feedback_csv/index.ts`
 - `supabase/functions/update_alert_status/index.ts`
 - `scripts/qa/edge-functions-privacy-checklist.mjs`
+- `scripts/qa/public-build-audit.mjs`
 
 ## Commands Executed
 
 | Command | Result |
 | --- | --- |
-| `git status --short --branch` | PASS: clean before work, then COR-133 branch with scoped changes |
-| `node --test supabase/functions/submit_feedback/index.test.mjs` | PASS: 1/1 |
-| `node --test "src/app/(capture)/capture-survey-token.test.mjs"` | PASS: 6/6 |
-| `node --test supabase/functions/regenerate_device_token/index.test.mjs` | PASS: 4/4 |
-| `pnpm lint` | PASS |
-| `pnpm typecheck` | PASS |
+| `git switch master && git pull --ff-only origin master && git rev-parse HEAD` | PASS: local `master` fast-forwarded to `b53f6b126e425e8c9747e9e1b95c1c9d53f4aacd` |
+| `pnpm dlx supabase functions deploy ... --project-ref wdurjrzkfjnlaatenwnb --use-api` | PASS: deployed 10 protected functions with existing `verify_jwt=true` |
+| `pnpm dlx supabase functions deploy submit_feedback --project-ref wdurjrzkfjnlaatenwnb --use-api --no-verify-jwt` | PASS: deployed public `submit_feedback` with existing `verify_jwt=false` |
+| Supabase list Edge Functions via connector | PASS: versions and `verify_jwt` confirmed after deploy |
 | `pnpm build` | PASS; generated static export in `out/` |
 | `pnpm qa:public-build` | PASS; no forbidden markers or source maps in `out/` |
-| `pnpm qa:edge-functions-privacy` | FAIL in production: deployed `submit_feedback` still leaks validation details |
-| `deno --version` | BLOCKED: Deno CLI not installed |
-| `supabase --version` | BLOCKED: Supabase CLI not installed |
-| `curl.exe -I https://sentiq.pages.dev...` | PASS/PARTIAL: required current headers present except HSTS and global framing pending deployment |
+| `pnpm qa:edge-functions-privacy` | PASS: 42 PASS, 0 FAIL, 1 SKIPPED |
+| `curl.exe -I https://sentiq.pages.dev...` | PASS: required headers observed on all requested routes |
+| `pnpm dlx wrangler pages deployment list --project-name sentiq` | BLOCKED: local environment lacks `CLOUDFLARE_API_TOKEN` for direct deployment SHA lookup |
+
+Previously executed before merge:
+- `node --test supabase/functions/submit_feedback/index.test.mjs`: PASS 1/1
+- `node --test "src/app/(capture)/capture-survey-token.test.mjs"`: PASS 6/6
+- `node --test supabase/functions/regenerate_device_token/index.test.mjs`: PASS 4/4
+- `pnpm lint`: PASS
+- `pnpm typecheck`: PASS
 
 ## Evidence Matrix
 
 | Area / case | Result | Evidence |
 | --- | --- | --- |
 | Allowed frontend env keys | PASS | `src/config/env.ts` only reads `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_APP_URL`. |
-| `.env.example` public/frontend separation | PASS WITH CAVEATS | Backend/demo vars are documented for scripts, not frontend. Values are placeholders only. |
+| Cloudflare Pages env vars | PASS MANUAL | User-provided Cloudflare screenshot verified expected names: `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NODE_VERSION`, `PNPM_VERSION`. Values were not copied. Backend secrets were not shown. |
 | Static build secrets scan | PASS | `pnpm qa:public-build` found no forbidden markers and no `.map` files in `out/`. |
 | Source maps in public build | PASS | `pnpm qa:public-build` would fail on `*.map`; none found. |
-| `submit_feedback` validation detail leak in source | PASS LOCAL | Local code now returns `invalid_payload` with controlled message for invalid payload and source mismatch. |
-| `submit_feedback` validation detail leak in production | FAIL | `pnpm qa:edge-functions-privacy` found `token_required`, `invalid_general_experience`, `customer_phone_requires_consent`, `comment_too_long`, and `source_mismatch`. Requires Edge Function deployment. |
-| Token absent | FAIL PROD / PASS LOCAL GUARD | Production QA leaks `token_required`; local `errorResponse` no longer accepts arbitrary details. |
+| `submit_feedback` validation detail leak in source | PASS | Local code returns `invalid_payload` with controlled message for invalid payload and source mismatch. |
+| `submit_feedback` validation detail leak in production | PASS | Post-deploy `pnpm qa:edge-functions-privacy` completed with 42 PASS, 0 FAIL. |
+| Token absent | PASS | Production QA no longer leaks `token_required`. |
 | Token nonexistent | PASS | Production QA returned controlled error for invalid token. |
 | Token revoked | PASS | Production QA regenerated QR token and confirmed previous token no longer loads. |
-| Enlace inactivo | BLOCKED | No safe production fixture for inactive link was available in automated QA. |
-| Restaurante/sucursal/dispositivo inactivo | BLOCKED | No safe production fixtures for inactive entities were available in automated QA. |
-| Payload invalid | FAIL PROD / PASS LOCAL | Production leaks validation rule names; local regression test passes. |
-| Source incorrecto | FAIL PROD / PASS LOCAL | Production leaks `source_mismatch`; local code maps to `invalid_payload`. |
-| Rating fuera de rango | FAIL PROD / PASS LOCAL | Production leaks `invalid_general_experience`; local regression protects against it. |
-| Teléfono sin consentimiento | FAIL PROD / PASS LOCAL | Production leaks `customer_phone_requires_consent`; local regression protects against it. |
-| Comentario demasiado largo | FAIL PROD / PASS LOCAL | Production leaks `comment_too_long`; local QA now detects it. |
+| Enlace inactivo | CAVEAT | No safe production fixture for inactive link was available in automated QA. Existing public invalid/revoked token paths were validated. |
+| Restaurante/sucursal/dispositivo inactivo | CAVEAT | No safe production fixtures for inactive entities were available in automated QA. |
+| Payload invalid | PASS | Production returns controlled `invalid_payload` without validation rule names. |
+| Source incorrecto | PASS | Production maps source mismatch to generic `invalid_payload`. |
+| Rating fuera de rango | PASS | Production no longer leaks `invalid_general_experience`. |
+| Telefono sin consentimiento | PASS | Production no longer leaks `customer_phone_requires_consent`. |
+| Comentario demasiado largo | PASS | Production no longer leaks `comment_too_long`. |
 | Rate limit | PASS | Production QA reached 429 with controlled error and no sensitive keys. |
 | Protected functions without JWT | PASS | Production QA verified 401 controlled errors. |
 | Wrong role / forbidden | PASS | Production QA verified protected role checks. |
 | Cross-tenant / forbidden alert | PASS | Production QA verified manager forbidden alert unchanged. |
-| Controlled 500 | BLOCKED | No safe deterministic 500 trigger without altering production data/config. |
+| Controlled 500 | CAVEAT | No safe deterministic 500 trigger without altering production data/config. |
 | HTTP methods not allowed | PASS | Production QA verified OPTIONS and GET handling. |
 | QR/device visible errors | PASS BY CODE REVIEW | Capture components show fixed safe messages and do not render raw Edge Function bodies or exception messages. |
-| CSV requires auth | PASS | Production QA verified unauthenticated protected functions reject JWT-less calls. |
+| CSV requires auth | PASS | Production QA verified protected functions reject JWT-less calls and CSV requires auth. |
 | CSV restaurant_admin scope | PASS | Production QA verified restaurant_admin receives CSV content response. |
 | CSV manager scope | PASS/PARTIAL | Code scopes managers to active `manager_branch_assignments`; production role checks passed where fixture was available. |
 | CSV platform_admin default | PASS | Production QA verified platform_admin receives 404 by default. |
 | CSV public URL persistence | PASS BY CODE REVIEW | `export_feedback_csv` returns `{ filename, content }`; no Storage upload, signed URL, public URL, or persistent file creation. |
 | CSV cross-tenant branch filter | PASS BY CODE REVIEW | Branch filters are constrained by `restaurant_id` or manager assignments and return 404 on inaccessible branch. |
-| Cloudflare required headers `/` | PASS | Production has `x-content-type-options: nosniff`, `referrer-policy: strict-origin-when-cross-origin`, `permissions-policy: camera=(), microphone=(), geolocation=()`. |
+| Cloudflare required headers `/` | PASS | Production has `Strict-Transport-Security`, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`. |
 | Cloudflare required headers `/s/...` | PASS | Same required headers present in production. |
 | Cloudflare required headers `/d/...` | PASS | Same required headers present in production. |
 | Cloudflare framing `/app/` | PASS | Production has `x-frame-options: DENY`. |
 | Cloudflare framing `/platform-admin/` | PASS | Production has `x-frame-options: DENY`. |
-| HSTS | BLOCKED/PENDING DEPLOY | Local `_headers` now adds `Strict-Transport-Security: max-age=31536000`; production does not show it yet. |
-| Broader framing | BLOCKED/PENDING DEPLOY | Local `_headers` applies `X-Frame-Options: DENY` globally. Decision: keep global DENY because QR/device surveys are expected to load as direct public pages and no current embedding/iframe requirement was found in `src`, `public`, or reviewed docs. Production currently applies DENY only on app/admin paths. |
-| CSP | BLOCKED / FOLLOW-UP | Not added. A strict CSP could break static Next.js chunks, inline styles, images, or Supabase connections without browser validation after deploy. |
-| Cloudflare Pages env vars | BLOCKED | No read-only dashboard/API access was available in this session. Must manually verify names only: `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NODE_VERSION`, `PNPM_VERSION`; backend secrets absent. |
+| HSTS | PASS | Production returns `Strict-Transport-Security: max-age=31536000` on all verified routes. |
+| Broader framing | PASS | Production returns `X-Frame-Options: DENY` globally on verified routes. |
+| CSP | CAVEAT / FOLLOW-UP | Not added. A strict CSP could break static Next.js chunks, inline styles, images, or Supabase connections without browser validation after deploy. |
 
 ## Build Scan Result
 
@@ -109,15 +118,40 @@ The scan reports only file path and pattern name. It does not print secret value
 
 ## Edge Functions Result
 
-Local code changes:
-- `supabase/functions/_shared/http.ts` now uses a controlled public message catalog and no longer accepts arbitrary public messages.
-- `supabase/functions/submit_feedback/index.ts` no longer serializes validation rule arrays or `source_mismatch`.
-- `supabase/functions/export_feedback_csv/index.ts` and `supabase/functions/update_alert_status/index.ts` no longer return `method_not_allowed` / `not_found_or_forbidden`.
-- `scripts/qa/edge-functions-privacy-checklist.mjs` now detects technical markers, internal validation codes, function names in public error bodies, and source mismatch leaks.
+Deployed all 11 Edge Functions on 2026-07-14 from `master` at `b53f6b126e425e8c9747e9e1b95c1c9d53f4aacd`.
 
-Production state:
-- BLOCKED/FAIL until Edge Functions are deployed.
-- Current deployed `submit_feedback` still leaks internal validation details as confirmed by `pnpm qa:edge-functions-privacy`.
+`verify_jwt` was preserved:
+- `get_public_survey_config`: version 6, `verify_jwt=true`
+- `submit_feedback`: version 6, `verify_jwt=false`
+- `create_restaurant`: version 3, `verify_jwt=true`
+- `create_restaurant_admin`: version 3, `verify_jwt=true`
+- `get_platform_activity_summary`: version 3, `verify_jwt=true`
+- `update_restaurant_account`: version 4, `verify_jwt=true`
+- `create_manager_user`: version 6, `verify_jwt=true`
+- `regenerate_qr_token`: version 3, `verify_jwt=true`
+- `regenerate_device_token`: version 3, `verify_jwt=true`
+- `update_alert_status`: version 3, `verify_jwt=true`
+- `export_feedback_csv`: version 3, `verify_jwt=true`
+
+`pnpm qa:edge-functions-privacy` result:
+- PASS: 42
+- FAIL: 0
+- SKIPPED: 1
+
+Skipped case:
+- `update_alert_status - admin attends configured pending alert when available`: `QA_ALLOWED_ALERT_ID` was already `attended`. This is not a privacy leak.
+
+The production QA did not expose:
+- `token_required`
+- `invalid_source`
+- `invalid_general_experience`
+- `invalid_service_attention`
+- `invalid_food_quality`
+- `invalid_service_speed`
+- `comment_too_long`
+- `phone_too_long`
+- `customer_phone_requires_consent`
+- `source_mismatch`
 
 ## Public Routes Result
 
@@ -136,23 +170,23 @@ Production verified on:
 - `/app/`
 - `/platform-admin/`
 
-Observed production headers:
-- `x-content-type-options: nosniff`
-- `referrer-policy: strict-origin-when-cross-origin`
+Observed production headers on all five routes:
+- `strict-transport-security: max-age=31536000`
 - `permissions-policy: camera=(), microphone=(), geolocation=()`
-- `x-frame-options: DENY` on `/app/` and `/platform-admin/`
+- `referrer-policy: strict-origin-when-cross-origin`
+- `x-content-type-options: nosniff`
+- `x-frame-options: DENY`
 
-Local repository update:
-- `public/_headers` now also sets `X-Frame-Options: DENY` globally.
-- `public/_headers` now sets `Strict-Transport-Security: max-age=31536000`.
+No `content-security-policy` header is intentionally present yet.
 
 Framing decision:
 - Keep global `X-Frame-Options: DENY`.
 - Rationale: public QR/device surveys are direct navigation flows, not embedded widgets. A repository search found no current iframe/embedding requirement for `/s` or `/d`.
 - If a future restaurant widget or partner embedding requirement appears, limit DENY back to `/app/*` and `/platform-admin/*` and use an explicitly tested CSP `frame-ancestors` allowlist for the embedded public routes.
 
-Not adopted:
-- CSP. Recommendation: define a report-only CSP first, validate static Next.js chunks, Supabase function/API calls, images/logos, and styles in production or preview, then graduate to enforcing CSP.
+Cloudflare deployment SHA note:
+- Effective production headers match the merged `_headers` from `b53f6b126e425e8c9747e9e1b95c1c9d53f4aacd`.
+- Direct deployment metadata lookup via Wrangler was blocked because no `CLOUDFLARE_API_TOKEN` was available locally.
 
 ## Variables Verified
 
@@ -161,14 +195,14 @@ Validated in code/build:
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `NEXT_PUBLIC_APP_URL`
 
-Pending Cloudflare dashboard verification:
+Manually verified in Cloudflare dashboard screenshot:
 - `NEXT_PUBLIC_APP_URL`
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `NODE_VERSION`
 - `PNPM_VERSION`
 
-Must be absent from Cloudflare Pages:
+Must remain absent from Cloudflare Pages:
 - `SUPABASE_SERVICE_ROLE_KEY`
 - backend JWT/admin secrets
 - private keys
@@ -186,21 +220,8 @@ No values were printed in this document.
 - Existing administrative business error codes such as `slug_conflict`, `email_conflict`, `admin_exists`, `restaurant_not_found`, and `branch_not_found` remain unchanged to avoid breaking approved admin UI contracts in this ticket.
 - Known Supabase leaked-password protection warning remains an external caveat and was not changed in COR-133.
 
-## Risks Pending
+## Remaining Follow-ups
 
-- Production Edge Functions still need deployment and re-run of `pnpm qa:edge-functions-privacy`.
-- Cloudflare Pages environment variables need read-only dashboard/API verification.
-- HSTS and global framing need deployment verification.
-- Inactive link/entity cases need safe production fixtures or a non-production environment with equivalent data.
-- CSP needs a separate report-only validation pass.
-- Deno/Supabase CLI checks were not available locally.
-
-## Evidence Required To Close COR-133
-
-1. Deploy the updated Edge Functions.
-2. Deploy the updated static frontend headers.
-3. Re-run `pnpm qa:edge-functions-privacy` and confirm zero failures.
-4. Re-run `pnpm build && pnpm qa:public-build`.
-5. Verify production headers again on `/`, `/s/<invalid>`, `/d/<invalid>`, `/app/`, and `/platform-admin/`.
-6. Verify Cloudflare Pages variables in dashboard/API and record names only.
-7. Add or provide safe inactive link/entity fixtures, or explicitly accept those cases as manually verified elsewhere.
+- Add or provide safe inactive link/entity fixtures, or explicitly accept those cases as manually verified elsewhere.
+- Evaluate CSP in report-only mode before enforcing.
+- Optionally verify Cloudflare deployment SHA through dashboard/API when a read-only API token is available.
