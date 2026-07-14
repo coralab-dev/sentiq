@@ -1,16 +1,17 @@
 "use client";
 
-import { ArrowRight, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { ROUTES } from "@/config/routes";
 import { getPostLoginRedirect, getCurrentSessionProfile } from "@/lib/auth";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const genericLoginError =
-  "No pudimos iniciar sesion. Revisa tus datos o solicita acceso al administrador.";
+  "No pudimos iniciar sesión. Revisa tus datos o solicita acceso al administrador.";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -24,13 +25,13 @@ function validateLoginForm(email: string, password: string): FormErrors {
   const normalizedEmail = email.trim();
 
   if (!normalizedEmail) {
-    nextErrors.email = "Ingresa tu correo electronico.";
+    nextErrors.email = "Ingresa tu correo electrónico.";
   } else if (!emailPattern.test(normalizedEmail)) {
-    nextErrors.email = "Ingresa un correo electronico valido.";
+    nextErrors.email = "Ingresa un correo electrónico válido.";
   }
 
   if (!password) {
-    nextErrors.password = "Ingresa tu contrasena.";
+    nextErrors.password = "Ingresa tu contraseña.";
   }
 
   return nextErrors;
@@ -45,6 +46,7 @@ export default function LoginPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResolvingSession, setIsResolvingSession] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -120,64 +122,98 @@ export default function LoginPage() {
 
   if (isResolvingSession) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-background px-6">
-        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-          <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-          <span>Validando sesion...</span>
+      <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#fbf7ef] px-6 text-[#24102d]">
+        <Link
+          href="/"
+          className="absolute left-6 top-6 text-3xl font-semibold tracking-[-0.05em] sm:left-10 sm:top-8"
+        >
+          Senti<span className="text-[#ff5947]">Q</span>
+        </Link>
+        <div className="flex items-center gap-3 text-sm font-medium text-[#6d626c]">
+          <Loader2 className="size-5 animate-spin text-[#ff5947]" aria-hidden="true" />
+          <span>Validando sesión...</span>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-background">
-      <div className="mx-auto grid min-h-screen w-full max-w-6xl grid-cols-1 lg:grid-cols-2">
-        <section className="flex flex-col justify-center gap-8 border-b border-border px-6 py-12 sm:px-10 lg:border-b-0 lg:border-r lg:px-14">
-          <div className="space-y-4">
-            <p className="text-sm font-medium uppercase tracking-normal text-muted-foreground">
-              SentiQ Restaurantes
-            </p>
-            <div className="space-y-3">
-              <h1 className="max-w-lg text-3xl font-semibold tracking-normal sm:text-4xl">
-                Acceso para equipos de operacion
+    <main className="min-h-screen bg-[#fbf7ef] text-[#24102d]">
+      <div className="grid min-h-screen lg:grid-cols-[minmax(0,1.08fr)_minmax(30rem,0.92fr)]">
+        <aside className="relative hidden min-h-screen overflow-hidden border-r border-[#38203e]/10 lg:block">
+          <Image
+            src="/images/landing/hero-restaurant-editorial.webp"
+            alt=""
+            fill
+            priority
+            sizes="55vw"
+            className="object-cover object-[70%_center]"
+            aria-hidden="true"
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(251,247,239,.98)_0%,rgba(251,247,239,.9)_34%,rgba(251,247,239,.24)_68%,rgba(251,247,239,.72)_100%)]" aria-hidden="true" />
+          <div className="relative z-10 flex min-h-screen flex-col justify-between p-10 xl:p-14">
+            <Link
+              href="/"
+              className="w-fit text-4xl font-semibold tracking-[-0.055em] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#ff5947]/25"
+            >
+              Senti<span className="text-[#ff5947]">Q</span>
+            </Link>
+
+            <div className="max-w-xl pb-[38vh] xl:pb-[34vh]">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#ff5947]">
+                Acceso para restaurantes
+              </p>
+              <h1 className="mt-5 text-balance text-5xl font-semibold leading-[0.98] tracking-[-0.05em] xl:text-6xl">
+                Escucha la operación. Da seguimiento.
               </h1>
-              <p className="max-w-xl text-base leading-7 text-muted-foreground">
-                Entra al panel administrativo para revisar feedback, atender
-                alertas y dar seguimiento a la operacion del restaurante.
+              <p className="mt-5 max-w-lg text-lg leading-8 text-[#615761]">
+                Respuestas, alertas y herramientas del restaurante en un espacio
+                de trabajo con acceso controlado.
               </p>
             </div>
-          </div>
 
-          <div className="grid gap-4 text-sm text-muted-foreground">
-            <div>
-              <p className="font-medium text-foreground">Roles permitidos</p>
-              <p>platform_admin, restaurant_admin y manager.</p>
+            <div className="flex items-center justify-between border-t border-[#38203e]/15 pt-5 text-xs font-bold uppercase tracking-[0.14em] text-[#716671]">
+              <span>Feedback operativo</span>
+              <span>Piloto controlado</span>
             </div>
-            <div>
-              <p className="font-medium text-foreground">Accesos publicos</p>
-              <p>
-                Encuestas, dispositivos, privacidad y confirmaciones no usan
-                esta pantalla.
+          </div>
+        </aside>
+
+        <section className="flex min-h-screen items-center justify-center px-5 py-8 sm:px-10 lg:px-12 xl:px-20">
+          <div className="w-full max-w-md motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:duration-700">
+            <div className="mb-14 flex items-center justify-between lg:hidden">
+              <Link href="/" className="text-3xl font-semibold tracking-[-0.05em]">
+                Senti<span className="text-[#ff5947]">Q</span>
+              </Link>
+              <span className="text-xs font-bold uppercase tracking-[0.14em] text-[#8a7e88]">
+                Acceso privado
+              </span>
+            </div>
+
+            <Link
+              href="/"
+              className="group inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-[#716671] transition hover:text-[#24102d] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#ff5947]/25"
+            >
+              <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" aria-hidden="true" />
+              Volver a SentiQ
+            </Link>
+
+            <div className="mt-8">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#ff5947]">
+                Panel del restaurante
               </p>
-            </div>
-          </div>
-        </section>
-
-        <section className="flex items-center justify-center px-6 py-12 sm:px-10">
-          <div className="w-full max-w-md rounded-lg border border-border bg-card p-6 shadow-sm">
-            <div className="mb-6 space-y-2">
-              <h2 className="text-2xl font-semibold tracking-normal">
-                Iniciar sesion
+              <h2 className="mt-4 text-4xl font-semibold tracking-[-0.045em] sm:text-5xl">
+                Bienvenido de vuelta.
               </h2>
-              <p className="text-sm text-muted-foreground">
-                Usa el correo y contrasena asignados a tu perfil.
+              <p className="mt-4 text-base leading-7 text-[#716671]">
+                Ingresa con el correo y la contraseña asignados a tu perfil.
               </p>
             </div>
 
-            <form className="space-y-5" onSubmit={handleSubmit} noValidate>
-              <div className="space-y-2">
-                <label className="text-sm font-medium" htmlFor="email">
-                  Correo electronico
+            <form className="mt-10 space-y-6" onSubmit={handleSubmit} noValidate>
+              <div className="space-y-2.5">
+                <label className="text-sm font-semibold" htmlFor="email">
+                  Correo electrónico
                 </label>
                 <input
                   id="email"
@@ -188,7 +224,8 @@ export default function LoginPage() {
                   onChange={(event) => setEmail(event.target.value)}
                   aria-invalid={Boolean(errors.email)}
                   aria-describedby={errors.email ? "email-error" : undefined}
-                  className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-3 focus:ring-ring/20"
+                  placeholder="nombre@restaurante.com"
+                  className="h-14 w-full border border-[#38203e]/15 bg-white/55 px-4 text-base outline-none transition placeholder:text-[#a499a3] focus:border-[#ff5947] focus:bg-white focus:ring-3 focus:ring-[#ff5947]/15"
                   disabled={isBusy}
                 />
                 {errors.email ? (
@@ -198,24 +235,36 @@ export default function LoginPage() {
                 ) : null}
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <label className="text-sm font-medium" htmlFor="password">
-                  Contrasena
+                  Contraseña
                 </label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  aria-invalid={Boolean(errors.password)}
-                  aria-describedby={
-                    errors.password ? "password-error" : undefined
-                  }
-                  className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none transition focus:border-ring focus:ring-3 focus:ring-ring/20"
-                  disabled={isBusy}
-                />
+                <div className="relative">
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    aria-invalid={Boolean(errors.password)}
+                    aria-describedby={
+                      errors.password ? "password-error" : undefined
+                    }
+                    className="h-14 w-full border border-[#38203e]/15 bg-white/55 px-4 pr-14 text-base outline-none transition focus:border-[#ff5947] focus:bg-white focus:ring-3 focus:ring-[#ff5947]/15"
+                    disabled={isBusy}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((visible) => !visible)}
+                    className="absolute inset-y-0 right-0 grid w-14 place-items-center text-[#766b75] transition hover:text-[#24102d] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-[#ff5947]/20"
+                    aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                    aria-pressed={showPassword}
+                    disabled={isBusy}
+                  >
+                    {showPassword ? <EyeOff className="size-5" aria-hidden="true" /> : <Eye className="size-5" aria-hidden="true" />}
+                  </button>
+                </div>
                 {errors.password ? (
                   <p id="password-error" className="text-sm text-destructive">
                     {errors.password}
@@ -225,27 +274,38 @@ export default function LoginPage() {
 
               {formError ? (
                 <div
-                  className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+                  className="border-l-2 border-[#ff5947] bg-[#fff0eb] px-4 py-3 text-sm leading-6 text-[#8f3328]"
                   role="alert"
                 >
                   {formError}
                 </div>
               ) : null}
 
-              <Button className="h-10 w-full" type="submit" disabled={isBusy}>
+              <Button
+                className="h-14 w-full rounded-none bg-[#2b1235] text-base text-white shadow-[0_16px_34px_-20px_rgba(43,18,53,.75)] hover:bg-[#3d1949] focus-visible:ring-[#ff5947]/30"
+                type="submit"
+                disabled={isBusy}
+              >
                 {isSubmitting ? (
                   <Loader2 className="animate-spin" aria-hidden="true" />
                 ) : (
                   <ArrowRight aria-hidden="true" />
                 )}
-                {isSubmitting ? "Entrando..." : "Entrar"}
+                {isSubmitting ? "Entrando..." : "Iniciar sesión"}
               </Button>
             </form>
 
-            <div className="mt-5 rounded-md border border-border bg-muted/40 px-3 py-3 text-sm text-muted-foreground">
-              La redireccion depende del rol: platform_admin entra a{" "}
-              {ROUTES.PLATFORM_ADMIN_RESTAURANTS}; restaurant_admin y manager
-              entran a {ROUTES.APP_DASHBOARD}.
+            <div className="mt-10 border-t border-[#38203e]/10 pt-6 text-sm leading-6 text-[#716671]">
+              <p>
+                ¿Tienes problemas para ingresar? Contacta a la persona de SentiQ
+                que te proporcionó el acceso.
+              </p>
+              <Link
+                href="/privacidad"
+                className="mt-4 inline-flex min-h-11 items-center font-semibold text-[#38203e] underline decoration-[#ff5947]/50 underline-offset-4 hover:decoration-[#ff5947] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#ff5947]/20"
+              >
+                Aviso de privacidad
+              </Link>
             </div>
           </div>
         </section>

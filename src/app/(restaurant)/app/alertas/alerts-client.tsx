@@ -9,6 +9,7 @@ import {
   Store,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
@@ -18,7 +19,9 @@ import {
   MetricCard,
   PageHeader,
   RatingScore,
+  ResponsiveInspector,
   SectionCard,
+  getSelectedItemId,
 } from "@/components/panel";
 import { EmptyState, LoadingState, StatusBadge } from "@/components/shared";
 import { Button } from "@/components/ui/button";
@@ -47,7 +50,7 @@ import {
 } from "./alerts-data";
 
 const inputClassName =
-  "h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15 disabled:bg-slate-50 disabled:text-slate-400";
+  "h-11 w-full rounded-xl border border-[var(--sq-line)] bg-[var(--sq-surface)] px-3 text-sm text-[var(--sq-ink)] outline-none transition focus:border-[var(--sq-coral)] focus:ring-2 focus:ring-[var(--sq-coral)]/15 disabled:bg-[var(--sq-soft)] disabled:text-[var(--sq-muted)]";
 
 type AlertsLoadState = {
   branches: AlertsBranch[];
@@ -68,6 +71,8 @@ const initialData: AlertsLoadState = {
 };
 
 export function AlertsClient() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const [filters, setFilters] = useState<AlertFilters>(() => getDefaultAlertFilters());
   const [data, setData] = useState<AlertsLoadState>(initialData);
@@ -203,6 +208,11 @@ export function AlertsClient() {
   );
 
   const metrics = useMemo(() => getAlertMetrics(enrichedAlerts), [enrichedAlerts]);
+  const selectedAlertId = getSelectedItemId(
+    searchParams.get("id"),
+    enrichedAlerts.map((alert) => alert.id),
+  );
+  const selectedAlert = enrichedAlerts.find((alert) => alert.id === selectedAlertId) ?? null;
 
   const visibleZones = useMemo(() => {
     if (filters.branchId === "all") {
@@ -224,6 +234,19 @@ export function AlertsClient() {
 
   function resetFilters() {
     setFilters(getDefaultAlertFilters());
+  }
+
+  function selectAlert(alertId: string) {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("id", alertId);
+    router.push(`${ROUTES.APP_ALERTS}?${params.toString()}`, { scroll: false });
+  }
+
+  function closeInspector() {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("id");
+    const query = params.toString();
+    router.push(query ? `${ROUTES.APP_ALERTS}?${query}` : ROUTES.APP_ALERTS, { scroll: false });
   }
 
   async function markAlertAttended(alertId: string) {
@@ -271,14 +294,15 @@ export function AlertsClient() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Seguimiento"
         title="Alertas"
-        description="Seguimiento de alertas visibles segun tu sesion y permisos."
+        description="Revisa experiencias pendientes, documenta el seguimiento y cierra cada caso."
         actions={
           <Button
             type="button"
             onClick={() => void loadAlerts()}
             disabled={isRefreshing}
-            className="bg-teal-700 text-white hover:bg-teal-800"
+            className="bg-[var(--sq-aubergine)] px-4 text-white hover:bg-[#3c1949]"
           >
             <RefreshCw
               className={cn("size-4", isRefreshing && "animate-spin")}
@@ -289,13 +313,25 @@ export function AlertsClient() {
         }
       />
 
+      <div className="flex w-fit max-w-full gap-1 overflow-x-auto rounded-xl border border-[var(--sq-line)] bg-[var(--sq-surface)] p-1" aria-label="Estado de las alertas">
+        {([
+          ["pending", "Pendientes"],
+          ["attended", "Atendidas"],
+          ["all", "Todas"],
+        ] as const).map(([value, label]) => (
+          <button key={value} type="button" onClick={() => updateFilters({ status: value })} aria-pressed={filters.status === value} className={cn("min-h-10 whitespace-nowrap rounded-lg px-4 text-sm font-semibold text-[var(--sq-muted)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sq-coral)]", filters.status === value && "bg-[var(--sq-aubergine)] text-white")}>
+            {label}
+          </button>
+        ))}
+      </div>
+
       <FilterBar
         className="[&>div:first-child]:lg:grid-cols-4 xl:[&>div:first-child]:grid-cols-6"
         actions={
           <div className="flex flex-wrap items-center gap-3">
             {data.lastUpdatedAt ? (
-              <p className="text-xs text-slate-500">
-                Ultima actualizacion: {formatDateTime(data.lastUpdatedAt.toISOString())}
+              <p className="text-xs text-[var(--sq-muted)]">
+                Actualizado {formatDateTime(data.lastUpdatedAt.toISOString())}
               </p>
             ) : null}
             <Button
@@ -393,20 +429,6 @@ export function AlertsClient() {
             <option value="device">Dispositivo</option>
           </select>
         </FilterField>
-        <FilterField label="Estado">
-          <select
-            value={filters.status}
-            disabled={isRefreshing}
-            onChange={(event) =>
-              updateFilters({ status: event.target.value as AlertFilters["status"] })
-            }
-            className={inputClassName}
-          >
-            <option value="all">Todas</option>
-            <option value="pending">Pendientes</option>
-            <option value="attended">Atendidas</option>
-          </select>
-        </FilterField>
       </FilterBar>
 
       {errorMessage ? (
@@ -423,7 +445,7 @@ export function AlertsClient() {
       ) : null}
 
       {actionMessage ? (
-        <div className="rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">
+        <div className="rounded-xl border border-[var(--sq-line)] bg-[var(--sq-surface)] px-4 py-3 text-sm text-[var(--sq-ink)]">
           {actionMessage}
         </div>
       ) : null}
@@ -438,7 +460,7 @@ export function AlertsClient() {
 
       {!errorMessage && data.branches.length > 0 ? (
         <>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid overflow-hidden rounded-2xl border border-[var(--sq-line)] bg-[var(--sq-surface)] sm:grid-cols-3">
             <MetricCard
               label="Pendientes"
               value={metrics.pending}
@@ -456,7 +478,7 @@ export function AlertsClient() {
             <MetricCard
               label="Total filtradas"
               value={metrics.total}
-              helper="Alertas visibles por RLS"
+              helper="Dentro de la vista actual"
               variant="info"
               icon={<Store className="size-5" aria-hidden="true" />}
             />
@@ -464,107 +486,87 @@ export function AlertsClient() {
 
           <SectionCard
             title="Alertas"
-            description="No se muestran telefonos sin consentimiento. Las acciones usan la Edge Function desplegada."
+            description="Los datos de contacto solo aparecen cuando existe consentimiento."
             contentClassName="p-0"
           >
             <DataTable
               columns={[
                 { key: "fecha", header: "Fecha" },
-                { key: "sucursal", header: "Sucursal" },
-                { key: "zona", header: "Zona" },
-                { key: "origen", header: "Origen" },
+                { key: "contexto", header: "Sucursal y origen" },
                 { key: "experiencia", header: "Experiencia" },
                 { key: "comentario", header: "Comentario" },
-                { key: "telefono", header: "Telefono" },
                 { key: "estado", header: "Estado" },
-                { key: "atendida", header: "Atendida por / fecha" },
+                { key: "atendida", header: "Seguimiento" },
               ]}
               rows={enrichedAlerts.map((alert) => ({
                 id: alert.id,
-                cells: {
-                  fecha: formatDateTime(alert.created_at),
-                  sucursal: getBranchName(data.branches, alert.branch_id),
-                  zona: getZoneName(data.zones, alert.zone_id),
-                  origen: formatSource(alert.source),
-                  experiencia: <RatingScore value={alert.general_experience as 1 | 2 | 3} />,
-                  comentario: (
-                    <span className="block max-w-56 whitespace-normal">
-                      {summarizeComment(alert.response?.comment)}
-                    </span>
-                  ),
-                  telefono: formatPhone(alert.response),
-                  estado:
-                    alert.status === "attended" ? (
-                      <StatusBadge status="attended" />
-                    ) : (
-                      <StatusBadge status="pending" />
-                    ),
-                  atendida:
-                    alert.status === "attended" ? (
-                      <span className="block min-w-40 whitespace-normal text-xs leading-5">
-                        {getAttendedByLabel(alert)}
-                        <br />
-                        <span className="text-slate-500">
-                          {formatDateTime(alert.attended_at)}
-                        </span>
-                      </span>
-                    ) : (
-                      "--"
-                    ),
-                },
-                actions: (
-                  <div className="flex flex-col items-end gap-2">
-                    <Link
-                      href={`${ROUTES.APP_ALERT_DETAIL}?id=${alert.id}`}
-                      className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50"
-                    >
-                      <Eye className="size-3.5" aria-hidden="true" />
-                      Ver detalle
-                    </Link>
-                    {alert.status === "pending" ? (
-                      <div className="flex w-48 flex-col gap-2">
-                        <input
-                          type="text"
-                          value={notesByAlertId[alert.id] ?? ""}
-                          maxLength={500}
-                          placeholder="Nota opcional"
-                          disabled={Boolean(updatingAlertId)}
-                          onChange={(event) =>
-                            setNotesByAlertId((current) => ({
-                              ...current,
-                              [alert.id]: event.target.value,
-                            }))
-                          }
-                          className="h-8 rounded-lg border border-slate-200 bg-white px-2.5 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15 disabled:bg-slate-50 disabled:text-slate-400"
-                        />
-                        <Button
-                          type="button"
-                          size="sm"
-                          onClick={() => void markAlertAttended(alert.id)}
-                          disabled={Boolean(updatingAlertId)}
-                          className="bg-teal-700 text-white hover:bg-teal-800"
-                        >
-                          {updatingAlertId === alert.id ? "Actualizando" : "Marcar atendida"}
-                        </Button>
-                      </div>
-                    ) : null}
+                selected: alert.id === selectedAlertId,
+                onSelect: () => selectAlert(alert.id),
+                mobileSummary: (
+                  <div className="space-y-3">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0"><p className="truncate text-sm font-semibold text-[var(--sq-ink)]">{getBranchName(data.branches, alert.branch_id)}</p><p className="mt-1 text-xs text-[var(--sq-muted)]">{getZoneName(data.zones, alert.zone_id)} · {formatSource(alert.source)} · {formatDateTime(alert.created_at)}</p></div>
+                      <RatingScore value={alert.general_experience as 1 | 2 | 3} />
+                    </div>
+                    <p className="line-clamp-2 text-sm leading-6 text-[var(--sq-ink)]">{summarizeComment(alert.response?.comment, 150)}</p>
+                    {alert.status === "attended" ? <StatusBadge status="attended" /> : <StatusBadge status="pending" />}
                   </div>
                 ),
+                cells: {
+                  fecha: formatDateTime(alert.created_at),
+                  contexto: <div><p className="font-medium text-[var(--sq-ink)]">{getBranchName(data.branches, alert.branch_id)}</p><p className="text-xs text-[var(--sq-muted)]">{getZoneName(data.zones, alert.zone_id)} · {formatSource(alert.source)}</p></div>,
+                  experiencia: <RatingScore value={alert.general_experience as 1 | 2 | 3} />,
+                  comentario: <span className="block max-w-72 whitespace-normal text-[var(--sq-ink)]">{summarizeComment(alert.response?.comment)}</span>,
+                  estado: alert.status === "attended" ? <StatusBadge status="attended" /> : <StatusBadge status="pending" />,
+                  atendida: alert.status === "attended" ? <span className="block min-w-40 whitespace-normal text-xs leading-5">{getAttendedByLabel(alert)}<br /><span className="text-[var(--sq-muted)]">{formatDateTime(alert.attended_at)}</span></span> : "Pendiente de atención",
+                },
               }))}
-              actionsHeader="Acciones"
-              emptyState={
-                <EmptyState
-                  title="No hay alertas"
-                  description="Las alertas visibles apareceran aqui cuando coincidan con los filtros."
-                  className="rounded-none border-0"
-                />
-              }
-              className="rounded-none border-0 shadow-none"
+              emptyState={<EmptyState title="No hay alertas" description="Las alertas aparecerán aquí cuando coincidan con los filtros." className="rounded-none border-0" />}
+              className="rounded-none border-0"
             />
           </SectionCard>
 
         </>
       ) : null}
+
+      <ResponsiveInspector
+        open={Boolean(selectedAlert)}
+        onOpenChange={(open) => { if (!open) closeInspector(); }}
+        title="Seguimiento de alerta"
+        description={selectedAlert ? formatDateTime(selectedAlert.created_at) : undefined}
+        footer={selectedAlert ? (
+          <div className="space-y-3">
+            {selectedAlert.status === "pending" ? (
+              <>
+                <label className="block"><span className="text-xs font-bold uppercase tracking-[0.08em] text-[var(--sq-muted)]">Nota interna opcional</span><textarea value={notesByAlertId[selectedAlert.id] ?? ""} maxLength={500} rows={3} disabled={Boolean(updatingAlertId)} onChange={(event) => setNotesByAlertId((current) => ({ ...current, [selectedAlert.id]: event.target.value }))} placeholder="Registra el seguimiento realizado" className="mt-2 w-full resize-none rounded-xl border border-[var(--sq-line)] bg-[var(--sq-surface)] p-3 text-sm text-[var(--sq-ink)] outline-none placeholder:text-[var(--sq-muted)] focus:border-[var(--sq-coral)] focus:ring-2 focus:ring-[var(--sq-coral)]/15" /></label>
+                <Button type="button" onClick={() => void markAlertAttended(selectedAlert.id)} disabled={Boolean(updatingAlertId)} className="w-full bg-[var(--sq-coral)] px-4 text-white hover:bg-[#e94b3a]">{updatingAlertId === selectedAlert.id ? "Actualizando..." : "Marcar atendida"}</Button>
+              </>
+            ) : null}
+            <Link href={`${ROUTES.APP_ALERT_DETAIL}?id=${selectedAlert.id}`} className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-[var(--sq-line)] bg-[var(--sq-surface)] px-4 text-sm font-semibold text-[var(--sq-ink)] transition hover:bg-[var(--sq-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sq-coral)]"><Eye className="size-4" aria-hidden="true" />Abrir detalle completo</Link>
+          </div>
+        ) : null}
+      >
+        {selectedAlert ? (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between gap-4"><div><p className="text-xs font-semibold text-[var(--sq-muted)]">Experiencia</p><div className="mt-2"><RatingScore value={selectedAlert.general_experience as 1 | 2 | 3} /></div></div>{selectedAlert.status === "attended" ? <StatusBadge status="attended" /> : <StatusBadge status="pending" />}</div>
+            <section className="border-y border-[var(--sq-line)] py-5"><p className="text-[0.6875rem] font-bold uppercase tracking-[0.1em] text-[var(--sq-muted)]">Comentario</p><p className="mt-3 text-sm leading-7 text-[var(--sq-ink)]">{selectedAlert.response?.comment?.trim() || "Esta alerta no incluye comentario."}</p></section>
+            <dl className="space-y-4">
+              <AlertInspectorRow label="Sucursal" value={getBranchName(data.branches, selectedAlert.branch_id)} />
+              <AlertInspectorRow label="Zona" value={getZoneName(data.zones, selectedAlert.zone_id)} />
+              <AlertInspectorRow label="Origen" value={formatSource(selectedAlert.source)} />
+              <AlertInspectorRow label="Teléfono" value={formatPhone(selectedAlert.response) || "No disponible"} />
+              {selectedAlert.internal_note ? <AlertInspectorRow label="Nota interna" value={selectedAlert.internal_note} /> : null}
+              {selectedAlert.status === "attended" ? <><AlertInspectorRow label="Atendida por" value={getAttendedByLabel(selectedAlert)} /><AlertInspectorRow label="Fecha de atención" value={formatDateTime(selectedAlert.attended_at)} /></> : null}
+            </dl>
+          </div>
+        ) : null}
+      </ResponsiveInspector>
     </div>
   );
+}
+
+
+
+function AlertInspectorRow({ label, value }: { label: string; value: string }) {
+  return <div className="flex items-start justify-between gap-4 text-sm"><dt className="text-[var(--sq-muted)]">{label}</dt><dd className="max-w-[65%] text-right font-semibold text-[var(--sq-ink)]">{value}</dd></div>;
 }

@@ -32,30 +32,27 @@ export function SurveyQuestion({
   return (
     <section
       className={cn(
-        "rounded-xl border border-slate-200 bg-white p-4 shadow-sm",
-        error && "border-red-200 ring-1 ring-red-100",
+        "rounded-2xl border border-[#ded4c7] bg-[#fffdf8] p-4 shadow-[0_1px_2px_rgba(43,18,53,0.05)] sm:p-5",
+        error && "border-red-300 ring-1 ring-red-100",
         className
       )}
       data-invalid={error ? "" : undefined}
     >
       <div className="mb-5 flex items-start gap-3">
         {number !== undefined && (
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-teal-700 text-sm font-semibold text-white">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#69723a] text-sm font-semibold text-white">
             {number}
           </span>
         )}
         <div className="min-w-0 space-y-1">
-          <h2 className="text-base font-semibold leading-6 text-slate-950">
+          <h2 className="text-base font-semibold leading-6 text-[#2b1235]">
             {title}
-            {required && <span className="ml-1 text-orange-600">*</span>}
+            {required && <span className="ml-1 text-[#ff5947]">*</span>}
           </h2>
-          {description && <p className="text-sm leading-5 text-slate-600">{description}</p>}
+          {description && <p className="text-sm leading-5 text-[#685f6b]">{description}</p>}
         </div>
       </div>
       {children ?? <RatingScale value={value} onChange={onChange} error={error} />}
-      {children && error && (
-        <p className="mt-3 text-sm font-medium text-red-600">{error}</p>
-      )}
     </section>
   );
 }

@@ -4,6 +4,7 @@ import {
   AlertTriangle,
   Bell,
   CalendarDays,
+  ChevronRight,
   Download,
   MessageSquareText,
   RefreshCw,
@@ -24,7 +25,7 @@ import {
   RatingScore,
   SectionCard,
 } from "@/components/panel";
-import { EmptyState, LoadingState, StatusBadge } from "@/components/shared";
+import { EmptyState, LoadingState } from "@/components/shared";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/config/routes";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -55,7 +56,7 @@ import {
 } from "./dashboard-refresh";
 
 const inputClassName =
-  "h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15 disabled:bg-slate-50 disabled:text-slate-400";
+  "h-11 w-full rounded-xl border border-[var(--sq-line)] bg-[var(--sq-surface)] px-3 text-sm text-[var(--sq-ink)] outline-none transition focus:border-[var(--sq-coral)] focus:ring-2 focus:ring-[var(--sq-coral)]/15 disabled:bg-[var(--sq-soft)] disabled:text-[var(--sq-muted)]";
 
 type DashboardLoadState = {
   branches: DashboardBranch[];
@@ -250,9 +251,9 @@ export function DashboardClient() {
   );
 
   const recentResponses = data.responses.slice(0, 8);
-  const recentComments = data.responses
-    .filter((response) => Boolean(response.comment?.trim()))
-    .slice(0, 4);
+  const pendingAlerts = data.alerts
+    .filter((alert) => alert.status === "pending")
+    .slice(0, 6);
 
   const branchSelectDisabled = data.branches.length <= 1 || isRefreshing;
   const showNoBranchesState = !isInitialLoading && !errorMessage && data.branches.length === 0;
@@ -274,13 +275,14 @@ export function DashboardClient() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="OperaciÃ³n"
         title="Resumen general"
-        description="Monitorea la experiencia de clientes con datos filtrados por tu sesion y permisos."
+        description="Revisa primero lo que necesita atenciÃ³n y mantÃ©n el contexto de la experiencia reciente."
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <Link
               href={ROUTES.APP_EXPORT}
-              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[var(--sq-line)] bg-[var(--sq-surface)] px-4 text-sm font-semibold text-[var(--sq-ink)] transition hover:bg-[var(--sq-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sq-coral)]"
             >
               <Download className="size-4" aria-hidden="true" />
               Exportar
@@ -289,7 +291,7 @@ export function DashboardClient() {
               type="button"
               onClick={() => void loadDashboard({ mode: "manual" })}
               disabled={isRefreshing}
-              className="bg-teal-700 text-white hover:bg-teal-800"
+              className="bg-[var(--sq-aubergine)] px-4 text-white hover:bg-[#3c1949] focus-visible:ring-[var(--sq-coral)]/30"
             >
               <RefreshCw
                 className={cn("size-4", isRefreshing && "animate-spin")}
@@ -385,7 +387,7 @@ export function DashboardClient() {
 
       {!errorMessage && data.branches.length > 0 ? (
         <>
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+          <div className="grid overflow-hidden rounded-2xl border border-[var(--sq-line)] bg-[var(--sq-surface)] sm:grid-cols-2 xl:grid-cols-6">
             <MetricCard
               label="Total de respuestas"
               value={metrics.totalResponses}
@@ -434,125 +436,48 @@ export function DashboardClient() {
             />
           </div>
 
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-            <SectionCard
-              title="Ultimas respuestas"
-              description="Feedback reciente dentro del rango seleccionado."
-              contentClassName="p-0"
-            >
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.35fr)]">
+            <SectionCard title="Requiere atención" description="Alertas pendientes dentro del periodo seleccionado." contentClassName="p-0">
+              {pendingAlerts.length > 0 ? (
+                <div className="divide-y divide-[var(--sq-line)]">
+                  {pendingAlerts.map((alert) => (
+                    <Link key={alert.id} href={`${ROUTES.APP_ALERT_DETAIL}?id=${alert.id}`} className="group flex min-h-20 items-center gap-4 px-5 py-4 transition hover:bg-[var(--sq-coral-soft)]/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--sq-coral)] sm:px-6">
+                      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[var(--sq-coral-soft)] text-[var(--sq-coral)]"><AlertTriangle className="size-5" aria-hidden="true" /></span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-semibold text-[var(--sq-ink)]">{getBranchName(data.branches, alert.branch_id)}</span>
+                        <span className="mt-1 block truncate text-xs text-[var(--sq-muted)]">{getZoneName(data.zones, alert.zone_id)} · {formatSource(alert.source)} · {formatRelativeDate(alert.created_at)}</span>
+                      </span>
+                      <RatingScore value={clampRating(alert.general_experience)} />
+                      <ChevronRight className="size-4 shrink-0 text-[var(--sq-muted)] transition group-hover:translate-x-0.5" aria-hidden="true" />
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <EmptyState title="Sin alertas pendientes" description="No hay experiencias que requieran seguimiento en este periodo." className="rounded-none border-0" />
+              )}
+              <div className="border-t border-[var(--sq-line)] p-4 sm:px-6">
+                <Link href={ROUTES.APP_ALERTS} className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-[var(--sq-aubergine)] hover:text-[var(--sq-coral)]">Ver todas las alertas<ChevronRight className="size-4" aria-hidden="true" /></Link>
+              </div>
+            </SectionCard>
+
+            <SectionCard title="Respuestas recientes" description="Últimas respuestas recibidas dentro del mismo periodo." contentClassName="p-0">
               <DataTable
-                columns={[
-                  { key: "fecha", header: "Fecha" },
-                  { key: "sucursal", header: "Sucursal" },
-                  { key: "zona", header: "Zona" },
-                  { key: "origen", header: "Origen" },
-                  { key: "general", header: "Experiencia" },
-                  { key: "atencion", header: "Atencion" },
-                  { key: "alimentos", header: "Alimentos" },
-                  { key: "rapidez", header: "Rapidez" },
-                  { key: "comentario", header: "Comentario" },
-                ]}
+                columns={[{ key: "fecha", header: "Fecha" }, { key: "sucursal", header: "Sucursal" }, { key: "general", header: "Experiencia" }, { key: "comentario", header: "Comentario" }]}
                 rows={recentResponses.map((response) => ({
                   id: response.id,
                   cells: {
                     fecha: formatDateTime(response.created_at),
-                    sucursal: getBranchName(data.branches, response.branch_id),
-                    zona: getZoneName(data.zones, response.zone_id),
-                    origen: formatSource(response.source),
+                    sucursal: <div><p className="font-medium text-[var(--sq-ink)]">{getBranchName(data.branches, response.branch_id)}</p><p className="text-xs text-[var(--sq-muted)]">{getZoneName(data.zones, response.zone_id)} · {formatSource(response.source)}</p></div>,
                     general: <RatingScore value={clampRating(response.general_experience)} />,
-                    atencion: <RatingScore value={clampRating(response.service_attention)} />,
-                    alimentos: <RatingScore value={clampRating(response.food_quality)} />,
-                    rapidez: <RatingScore value={clampRating(response.service_speed)} />,
-                    comentario: (
-                      <span className="block max-w-56 whitespace-normal">
-                        {summarizeComment(response.comment)}
-                      </span>
-                    ),
+                    comentario: <span className="block max-w-72 whitespace-normal text-[var(--sq-ink)]">{summarizeComment(response.comment, 110)}</span>,
                   },
-                  actions: response.has_alert ? (
-                    <StatusBadge status="pending" label="Con alerta" />
-                  ) : (
-                    <StatusBadge status="completed" label="Sin alerta" />
-                  ),
+                  actions: <Link href={`${ROUTES.APP_RESPONSE_DETAIL}?id=${response.id}`} className="inline-flex min-h-10 items-center gap-1 text-xs font-semibold text-[var(--sq-aubergine)] hover:text-[var(--sq-coral)]">Ver<ChevronRight className="size-3.5" aria-hidden="true" /></Link>,
                 }))}
-                actionsHeader="Estado"
-                emptyState={
-                  <EmptyState
-                    title="No hay respuestas en este rango"
-                    description="Cambia las fechas o la sucursal para consultar otra ventana."
-                    className="rounded-none border-0"
-                  />
-                }
-                className="rounded-none border-0 shadow-none"
+                actionsHeader="Detalle"
+                emptyState={<EmptyState title="No hay respuestas en este rango" description="Cambia las fechas o la sucursal para consultar otra ventana." className="rounded-none border-0" />}
+                className="rounded-none border-0"
               />
             </SectionCard>
-
-            <div className="space-y-6">
-              <SectionCard
-                title="Comentarios recientes"
-                description="Solo respuestas con comentario. No se muestran telefonos ni nombres."
-                contentClassName="p-0"
-              >
-                {recentComments.length > 0 ? (
-                  <div className="divide-y divide-slate-100">
-                    {recentComments.map((response) => (
-                      <article key={response.id} className="space-y-2 p-5">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <p className="text-sm font-medium text-slate-950">
-                              {getBranchName(data.branches, response.branch_id)}
-                            </p>
-                            <p className="text-xs text-slate-500">
-                              {getZoneName(data.zones, response.zone_id)} ·{" "}
-                              {formatSource(response.source)}
-                            </p>
-                          </div>
-                          <RatingScore
-                            value={clampRating(response.general_experience)}
-                          />
-                        </div>
-                        <p className="text-sm leading-6 text-slate-700">
-                          {summarizeComment(response.comment, 140)}
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          {formatRelativeDate(response.created_at)}
-                        </p>
-                      </article>
-                    ))}
-                  </div>
-                ) : (
-                  <EmptyState
-                    title="Sin comentarios recientes"
-                    description="Las respuestas con comentario apareceran aqui."
-                    className="rounded-none border-0"
-                  />
-                )}
-              </SectionCard>
-
-              <SectionCard title="Alertas pendientes">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <p className="text-3xl font-semibold text-slate-950">
-                        {metrics.pendingAlerts}
-                      </p>
-                      <p className="text-sm text-slate-500">
-                        Pendientes en el periodo
-                      </p>
-                    </div>
-                    <div className="flex size-12 items-center justify-center rounded-full bg-amber-50 text-amber-700">
-                      <AlertTriangle className="size-6" aria-hidden="true" />
-                    </div>
-                  </div>
-                  <Link
-                    href={ROUTES.APP_ALERTS}
-                    className="inline-flex h-9 w-full items-center justify-center rounded-lg bg-slate-950 px-3 text-sm font-medium text-white transition hover:bg-slate-800"
-                  >
-                    Ir a alertas
-                  </Link>
-                </div>
-              </SectionCard>
-            </div>
           </div>
 
           {showEmptyResponsesState ? (

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { AppShell } from "@/components/layout/app-shell";
+import "./restaurant-theme.css";
 
 type RestaurantAppLayoutProps = {
   children: ReactNode;
@@ -9,5 +10,5 @@ type RestaurantAppLayoutProps = {
 export default function RestaurantAppLayout({
   children,
 }: RestaurantAppLayoutProps) {
-  return <AppShell>{children}</AppShell>;
+  return <AppShell variant="restaurant">{children}</AppShell>;
 }

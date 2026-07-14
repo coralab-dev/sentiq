@@ -1,117 +1,27 @@
-import {
-  ArrowRight,
-  Building2,
-  CircleHelp,
-  MapPinned,
-  MonitorSmartphone,
-  QrCode,
-  UserRound,
-  Users,
-} from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
-import { PageHeader } from "@/components/panel";
-import { StatusBadge } from "@/components/shared";
-import { ROUTES } from "@/config/routes";
+import { PageHeader, SectionCard } from "@/components/panel";
 
-const settingsSections = [
-  {
-    title: "Cuenta",
-    description: "Consulta plan, estado y datos basicos de la cuenta del restaurante.",
-    href: ROUTES.APP_SETTINGS_ACCOUNT,
-    icon: Building2,
-    available: true,
-  },
-  {
-    title: "Meseros",
-    description: "Gestiona meseros internos para futuras mediciones por atencion.",
-    href: ROUTES.APP_SETTINGS_WAITERS,
-    icon: UserRound,
-    available: true,
-  },
-  {
-    title: "QR por sucursal",
-    description: "Consulta y regenera el enlace QR publico de cada sucursal.",
-    href: ROUTES.APP_SETTINGS_QR,
-    icon: QrCode,
-    available: true,
-  },
-  {
-    title: "Dispositivos",
-    description: "Administra los dispositivos usados para capturar feedback.",
-    href: ROUTES.APP_SETTINGS_DEVICES,
-    icon: MonitorSmartphone,
-    available: true,
-  },
-  {
-    title: "Encuesta",
-    description: "Configura branding, textos y preguntas visibles en la encuesta.",
-    href: ROUTES.APP_SETTINGS_QUESTIONS,
-    icon: CircleHelp,
-    available: true,
-  },
-  {
-    title: "Usuarios y gerentes",
-    description: "Gestiona usuarios y el alcance asignado a gerentes.",
-    href: ROUTES.APP_SETTINGS_USERS,
-    icon: Users,
-    available: true,
-  },
-  {
-    title: "Zonas",
-    description: "Organiza las zonas operativas de cada sucursal.",
-    href: ROUTES.APP_SETTINGS_ZONES,
-    icon: MapPinned,
-    available: true,
-  },
-] as const;
+import { settingsNavigationGroups } from "./settings-navigation";
 
 export default function RestaurantSettingsPage() {
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Configuracion"
-        description="Administra las opciones operativas disponibles para tu restaurante."
-      />
-
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {settingsSections.map((section) => {
-          const Icon = section.icon;
-
-          return (
-            <Link
-              key={section.href}
-              href={section.href}
-              className="group flex min-h-48 flex-col rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:border-teal-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <span className="grid size-11 place-items-center rounded-lg bg-teal-50 text-teal-700">
-                  <Icon className="size-5" aria-hidden="true" />
-                </span>
-                {section.available ? (
-                  <StatusBadge status="active" label="Disponible" />
-                ) : (
-                  <StatusBadge status="pending" label="Pendiente" />
-                )}
-              </div>
-
-              <div className="mt-5 flex-1">
-                <h2 className="font-semibold text-slate-950">{section.title}</h2>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
-                  {section.description}
-                </p>
-              </div>
-
-              <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-teal-700">
-                Abrir configuracion
-                <ArrowRight
-                  className="size-4 transition-transform group-hover:translate-x-0.5"
-                  aria-hidden="true"
-                />
-              </span>
-            </Link>
-          );
-        })}
+      <PageHeader eyebrow="Administración" title="Configuración" description="Organiza el restaurante, los puntos de captura y el acceso del equipo desde un solo lugar." />
+      <div className="space-y-5">
+        {settingsNavigationGroups.map((group) => (
+          <SectionCard key={group.label} title={group.label} contentClassName="p-0">
+            <div className="divide-y divide-[var(--sq-line)]">
+              {group.items.map((item) => (
+                <Link key={item.href} href={item.href} className="group flex min-h-20 items-center justify-between gap-4 px-5 py-4 transition hover:bg-[var(--sq-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--sq-coral)] sm:px-6">
+                  <span className="min-w-0"><span className="block font-semibold text-[var(--sq-ink)]">{item.label}</span><span className="mt-1 block text-sm text-[var(--sq-muted)]">{item.description}</span></span>
+                  <ArrowRight className="size-4 shrink-0 text-[var(--sq-muted)] transition group-hover:translate-x-0.5 group-hover:text-[var(--sq-coral)]" aria-hidden="true" />
+                </Link>
+              ))}
+            </div>
+          </SectionCard>
+        ))}
       </div>
     </div>
   );

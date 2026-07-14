@@ -22,18 +22,18 @@ export function SectionCard({
   return (
     <section
       className={cn(
-        "rounded-lg border border-slate-200 bg-white shadow-sm",
+        "overflow-hidden rounded-2xl border border-[var(--sq-line,#e2e8f0)] bg-[var(--sq-surface,#fff)]",
         className,
       )}
     >
       {(title || description || actions) && (
-        <div className="flex flex-col gap-3 border-b border-slate-200 px-5 py-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col gap-3 border-b border-[var(--sq-line,#e2e8f0)] px-5 py-4 sm:flex-row sm:items-start sm:justify-between sm:px-6 sm:py-5">
           <div className="min-w-0 space-y-1">
             {title ? (
-              <h3 className="text-base font-semibold text-slate-950">{title}</h3>
+              <h3 className="text-base font-semibold tracking-[-0.02em] text-[var(--sq-ink,#020617)]">{title}</h3>
             ) : null}
             {description ? (
-              <p className="text-sm leading-5 text-slate-500">{description}</p>
+              <p className="text-sm leading-5 text-[var(--sq-muted,#64748b)]">{description}</p>
             ) : null}
           </div>
           {actions ? (
@@ -43,7 +43,7 @@ export function SectionCard({
           ) : null}
         </div>
       )}
-      <div className={cn("p-5", contentClassName)}>{children}</div>
+      <div className={cn("p-5 sm:p-6", contentClassName)}>{children}</div>
     </section>
   );
 }

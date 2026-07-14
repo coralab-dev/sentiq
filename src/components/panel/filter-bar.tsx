@@ -12,7 +12,7 @@ export function FilterBar({ children, actions, className }: FilterBarProps) {
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:flex-row md:items-center md:justify-between",
+        "flex flex-col gap-4 rounded-2xl border border-[var(--sq-line,#e2e8f0)] bg-[var(--sq-surface,#fff)] p-4 md:flex-row md:items-end md:justify-between sm:p-5",
         className,
       )}
     >
@@ -20,7 +20,7 @@ export function FilterBar({ children, actions, className }: FilterBarProps) {
         {children}
       </div>
       {actions ? (
-        <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>
+        <div className="flex shrink-0 flex-wrap items-center gap-2 [&_[data-slot=button]]:min-h-11">{actions}</div>
       ) : null}
     </div>
   );
@@ -34,7 +34,7 @@ type FilterFieldProps = {
 export function FilterField({ label, children }: FilterFieldProps) {
   return (
     <label className="min-w-0 space-y-1.5">
-      <span className="text-xs font-medium text-slate-500">{label}</span>
+      <span className="text-[0.6875rem] font-bold uppercase tracking-[0.09em] text-[var(--sq-muted,#64748b)]">{label}</span>
       {children}
     </label>
   );

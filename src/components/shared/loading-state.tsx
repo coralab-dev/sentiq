@@ -11,7 +11,7 @@ type LoadingStateProps = {
 
 export function LoadingState({
   title = "Cargando",
-  description = "Estamos preparando la informacion.",
+  description = "Estamos preparando la información.",
   className,
 }: LoadingStateProps) {
   return (

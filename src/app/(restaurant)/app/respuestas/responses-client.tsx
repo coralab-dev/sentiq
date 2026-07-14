@@ -4,12 +4,14 @@ import {
   AlertTriangle,
   CalendarDays,
   Eye,
+  ListFilter,
   MessageSquareText,
   RefreshCw,
   RotateCcw,
   Store,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
@@ -19,7 +21,10 @@ import {
   MetricCard,
   PageHeader,
   RatingScore,
+  ResponsiveInspector,
   SectionCard,
+  getSelectedItemId,
+  getVisibleFilterChips,
 } from "@/components/panel";
 import { EmptyState, LoadingState, StatusBadge } from "@/components/shared";
 import { Button } from "@/components/ui/button";
@@ -48,7 +53,7 @@ import {
 } from "./responses-data";
 
 const inputClassName =
-  "h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-600/15 disabled:bg-slate-50 disabled:text-slate-400";
+  "h-11 w-full rounded-xl border border-[var(--sq-line)] bg-[var(--sq-surface)] px-3 text-sm text-[var(--sq-ink)] outline-none transition focus:border-[var(--sq-coral)] focus:ring-2 focus:ring-[var(--sq-coral)]/15 disabled:bg-[var(--sq-soft)] disabled:text-[var(--sq-muted)]";
 
 type ResponsesLoadState = {
   branches: ResponsesBranch[];
@@ -65,6 +70,8 @@ const initialData: ResponsesLoadState = {
 };
 
 export function ResponsesClient() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const [filters, setFilters] = useState<ResponseFilters>(() =>
     getDefaultResponseFilters(),
@@ -75,6 +82,7 @@ export function ResponsesClient() {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   const loadResponses = useCallback(async () => {
     setErrorMessage(null);
@@ -199,6 +207,36 @@ export function ResponsesClient() {
     return data.zones.filter((zone) => zone.branch_id === filters.branchId);
   }, [data.zones, filters.branchId]);
 
+  const selectedResponseId = getSelectedItemId(
+    searchParams.get("id"),
+    filteredResponses.map((response) => response.id),
+  );
+  const selectedResponse = filteredResponses.find(
+    (response) => response.id === selectedResponseId,
+  ) ?? null;
+
+  const activeFilterChips = getVisibleFilterChips(
+    {
+      branchId: filters.branchId,
+      zoneId: filters.zoneId,
+      source: filters.source,
+      lowRating: filters.lowRating,
+      comment: filters.comment,
+      phone: filters.phone,
+      alert: filters.alert,
+    },
+    { branchId: "all", zoneId: "all", source: "all", lowRating: "all", comment: "all", phone: "all", alert: "all" },
+    {
+      branchId: (value) => data.branches.find((branch) => branch.id === value)?.name ?? value,
+      zoneId: (value) => data.zones.find((zone) => zone.id === value)?.name ?? value,
+      source: (value) => value === "qr" ? "Origen: QR" : "Origen: dispositivo",
+      lowRating: (value) => value === "lte2" ? "Experiencia de 1â€“2" : "Experiencia de 1â€“3",
+      comment: (value) => value === "with_comment" ? "Con comentario" : "Sin comentario",
+      phone: (value) => value === "with_phone" ? "Con telÃ©fono consentido" : "Sin telÃ©fono",
+      alert: (value) => value === "with_alert" ? "Con alerta" : "Sin alerta",
+    },
+  );
+
   const branchSelectDisabled = data.branches.length <= 1 || isRefreshing;
   const showNoBranchesState = !isInitialLoading && !errorMessage && data.branches.length === 0;
   const showEmptyState =
@@ -220,6 +258,19 @@ export function ResponsesClient() {
     setPage(1);
   }
 
+  function selectResponse(responseId: string) {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("id", responseId);
+    router.push(`${ROUTES.APP_RESPONSES}?${params.toString()}`, { scroll: false });
+  }
+
+  function closeInspector() {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("id");
+    const query = params.toString();
+    router.push(query ? `${ROUTES.APP_RESPONSES}?${query}` : ROUTES.APP_RESPONSES, { scroll: false });
+  }
+
   if (isInitialLoading) {
     return (
       <LoadingState
@@ -232,14 +283,15 @@ export function ResponsesClient() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Actividad"
         title="Respuestas"
-        description="Listado real de feedback visible para tu usuario, filtrado por RLS y permisos."
+        description="Consulta cada respuesta, ajusta los filtros y abre el detalle sin perder el listado."
         actions={
           <Button
             type="button"
             onClick={() => void loadResponses()}
             disabled={isRefreshing}
-            className="bg-teal-700 text-white hover:bg-teal-800"
+            className="bg-[var(--sq-aubergine)] px-4 text-white hover:bg-[#3c1949]"
           >
             <RefreshCw
               className={cn("size-4", isRefreshing && "animate-spin")}
@@ -251,19 +303,23 @@ export function ResponsesClient() {
       />
 
       <FilterBar
-        className="[&>div:first-child]:lg:grid-cols-4 xl:[&>div:first-child]:grid-cols-8"
+        className="[&>div:first-child]:lg:grid-cols-3"
         actions={
           <div className="flex flex-wrap items-center gap-3">
             {data.lastUpdatedAt ? (
-              <p className="text-xs text-slate-500">
-                Ultima actualizacion: {formatDateTime(data.lastUpdatedAt.toISOString())}
+              <p className="text-xs text-[var(--sq-muted)]">
+                Actualizado {formatDateTime(data.lastUpdatedAt.toISOString())}
               </p>
             ) : null}
+            <Button type="button" variant="outline" onClick={() => setShowAdvancedFilters((visible) => !visible)} aria-expanded={showAdvancedFilters}>
+              <ListFilter className="size-4" aria-hidden="true" />
+              {showAdvancedFilters ? "Ocultar filtros" : "MÃ¡s filtros"}
+            </Button>
             <Button
               type="button"
               variant="outline"
               onClick={resetFilters}
-              disabled={isRefreshing}
+              disabled={isRefreshing || activeFilterChips.length === 0}
             >
               <RotateCcw className="size-4" aria-hidden="true" />
               Limpiar
@@ -327,6 +383,7 @@ export function ResponsesClient() {
             ))}
           </select>
         </FilterField>
+        {showAdvancedFilters ? <>
         <FilterField label="Zona">
           <select
             value={filters.zoneId}
@@ -398,9 +455,10 @@ export function ResponsesClient() {
             <option value="without_phone">Sin telefono</option>
           </select>
         </FilterField>
+        </> : null}
       </FilterBar>
 
-      <FilterBar className="[&>div:first-child]:lg:grid-cols-3">
+      {showAdvancedFilters ? <FilterBar className="[&>div:first-child]:lg:grid-cols-3">
         <FilterField label="Alerta">
           <select
             value={filters.alert}
@@ -429,7 +487,18 @@ export function ResponsesClient() {
             ))}
           </select>
         </FilterField>
-      </FilterBar>
+      </FilterBar> : null}
+
+      {activeFilterChips.length > 0 ? (
+        <div className="flex flex-wrap items-center gap-2" aria-label="Filtros activos">
+          <span className="text-xs font-semibold text-[var(--sq-muted)]">Filtros activos</span>
+          {activeFilterChips.map((chip) => (
+            <button key={chip.key} type="button" onClick={() => updateFilters({ [chip.key]: "all" } as Partial<ResponseFilters>)} className="inline-flex min-h-9 items-center rounded-full border border-[var(--sq-line)] bg-[var(--sq-surface)] px-3 text-xs font-semibold text-[var(--sq-ink)] transition hover:border-[var(--sq-coral)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sq-coral)]" aria-label={`Quitar filtro ${chip.label}`}>
+              {chip.label}<span className="ml-2 text-[var(--sq-coral)]" aria-hidden="true">Ã—</span>
+            </button>
+          ))}
+        </div>
+      ) : null}
 
       {errorMessage ? (
         <EmptyState
@@ -454,7 +523,7 @@ export function ResponsesClient() {
 
       {!errorMessage && data.branches.length > 0 ? (
         <>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid overflow-hidden rounded-2xl border border-[var(--sq-line)] bg-[var(--sq-surface)] sm:grid-cols-3">
             <MetricCard
               label="Respuestas filtradas"
               value={filteredResponses.length}
@@ -480,70 +549,52 @@ export function ResponsesClient() {
 
           <SectionCard
             title="Respuestas recientes"
-            description="No se muestran nombres, emails ni telefonos sin consentimiento."
+            description="Los datos de contacto solo aparecen cuando existe consentimiento."
             contentClassName="p-0"
           >
             <DataTable
               columns={[
                 { key: "fecha", header: "Fecha" },
-                { key: "sucursal", header: "Sucursal" },
-                { key: "zona", header: "Zona" },
-                { key: "origen", header: "Origen" },
+                { key: "contexto", header: "Sucursal y origen" },
                 { key: "general", header: "Experiencia" },
-                { key: "atencion", header: "Atencion" },
+                { key: "atencion", header: "Atención" },
                 { key: "alimentos", header: "Alimentos" },
                 { key: "rapidez", header: "Rapidez" },
                 { key: "comentario", header: "Comentario" },
-                { key: "telefono", header: "Telefono" },
-                { key: "alerta", header: "Alerta" },
+                { key: "alerta", header: "Estado" },
               ]}
               rows={pagination.rows.map((response) => ({
                 id: response.id,
+                selected: response.id === selectedResponseId,
+                onSelect: () => selectResponse(response.id),
+                mobileSummary: (
+                  <div className="space-y-3">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0"><p className="truncate text-sm font-semibold text-[var(--sq-ink)]">{getBranchName(data.branches, response.branch_id)}</p><p className="mt-1 text-xs text-[var(--sq-muted)]">{getZoneName(data.zones, response.zone_id)} · {formatSource(response.source)} · {formatDateTime(response.created_at)}</p></div>
+                      <RatingScore value={clampRating(response.general_experience)} />
+                    </div>
+                    <p className="line-clamp-2 text-sm leading-6 text-[var(--sq-ink)]">{summarizeComment(response.comment, 150)}</p>
+                    {response.has_alert ? <StatusBadge status="pending" label="Con alerta" /> : <StatusBadge status="completed" label="Sin alerta" />}
+                  </div>
+                ),
                 cells: {
                   fecha: formatDateTime(response.created_at),
-                  sucursal: getBranchName(data.branches, response.branch_id),
-                  zona: getZoneName(data.zones, response.zone_id),
-                  origen: formatSource(response.source),
+                  contexto: <div><p className="font-medium text-[var(--sq-ink)]">{getBranchName(data.branches, response.branch_id)}</p><p className="text-xs text-[var(--sq-muted)]">{getZoneName(data.zones, response.zone_id)} · {formatSource(response.source)}</p></div>,
                   general: <RatingScore value={clampRating(response.general_experience)} />,
                   atencion: <RatingScore value={clampRating(response.service_attention)} />,
                   alimentos: <RatingScore value={clampRating(response.food_quality)} />,
                   rapidez: <RatingScore value={clampRating(response.service_speed)} />,
-                  comentario: (
-                    <span className="block max-w-56 whitespace-normal">
-                      {summarizeComment(response.comment)}
-                    </span>
-                  ),
-                  telefono: formatPhone(response),
-                  alerta: response.has_alert ? (
-                    <StatusBadge status="pending" label="Con alerta" />
-                  ) : (
-                    <StatusBadge status="completed" label="Sin alerta" />
-                  ),
+                  comentario: <span className="block max-w-64 whitespace-normal text-[var(--sq-ink)]">{summarizeComment(response.comment)}</span>,
+                  alerta: response.has_alert ? <StatusBadge status="pending" label="Con alerta" /> : <StatusBadge status="completed" label="Sin alerta" />,
                 },
-                actions: (
-                  <Link
-                    href={`${ROUTES.APP_RESPONSE_DETAIL}?id=${response.id}`}
-                    className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50"
-                  >
-                    <Eye className="size-3.5" aria-hidden="true" />
-                    Ver detalle
-                  </Link>
-                ),
               }))}
-              actionsHeader="Accion"
-              emptyState={
-                <EmptyState
-                  title="No hay respuestas para estos filtros"
-                  description="Ajusta el rango, sucursal u otros filtros para consultar otra vista."
-                  className="rounded-none border-0"
-                />
-              }
-              className="rounded-none border-0 shadow-none"
+              emptyState={<EmptyState title="No hay respuestas para estos filtros" description="Ajusta el rango, sucursal u otros filtros para consultar otra vista." className="rounded-none border-0" />}
+              className="rounded-none border-0"
             />
           </SectionCard>
 
-          <div className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-slate-600">
+          <div className="flex flex-col gap-3 rounded-2xl border border-[var(--sq-line)] bg-[var(--sq-surface)] p-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-[var(--sq-muted)]">
               Mostrando {pagination.startItem}-{pagination.endItem} de{" "}
               {filteredResponses.length}
             </p>
@@ -556,7 +607,7 @@ export function ResponsesClient() {
               >
                 Anterior
               </Button>
-              <span className="text-sm font-medium text-slate-700">
+              <span className="text-sm font-medium text-[var(--sq-ink)]">
                 Pagina {pagination.page} de {pagination.totalPages}
               </span>
               <Button
@@ -580,6 +631,50 @@ export function ResponsesClient() {
           ) : null}
         </>
       ) : null}
+
+      <ResponsiveInspector
+        open={Boolean(selectedResponse)}
+        onOpenChange={(open) => { if (!open) closeInspector(); }}
+        title="Detalle de respuesta"
+        description={selectedResponse ? formatDateTime(selectedResponse.created_at) : undefined}
+        footer={selectedResponse ? (
+          <Link href={`${ROUTES.APP_RESPONSE_DETAIL}?id=${selectedResponse.id}`} className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--sq-aubergine)] px-4 text-sm font-semibold text-white transition hover:bg-[#3c1949] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sq-coral)]">
+            <Eye className="size-4" aria-hidden="true" />Abrir detalle completo
+          </Link>
+        ) : null}
+      >
+        {selectedResponse ? (
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-x-5 gap-y-4">
+              <InspectorRating label="Experiencia" value={selectedResponse.general_experience} />
+              <InspectorRating label="Atención" value={selectedResponse.service_attention} />
+              <InspectorRating label="Alimentos" value={selectedResponse.food_quality} />
+              <InspectorRating label="Rapidez" value={selectedResponse.service_speed} />
+            </div>
+            <section className="border-y border-[var(--sq-line)] py-5">
+              <p className="text-[0.6875rem] font-bold uppercase tracking-[0.1em] text-[var(--sq-muted)]">Comentario</p>
+              <p className="mt-3 text-sm leading-7 text-[var(--sq-ink)]">{selectedResponse.comment?.trim() || "Esta respuesta no incluye comentario."}</p>
+            </section>
+            <dl className="space-y-4">
+              <InspectorRow label="Sucursal" value={getBranchName(data.branches, selectedResponse.branch_id)} />
+              <InspectorRow label="Zona" value={getZoneName(data.zones, selectedResponse.zone_id)} />
+              <InspectorRow label="Origen" value={formatSource(selectedResponse.source)} />
+              <InspectorRow label="Teléfono" value={formatPhone(selectedResponse) || "No disponible"} />
+              <InspectorRow label="Alerta" value={selectedResponse.has_alert ? "Con alerta" : "Sin alerta"} />
+            </dl>
+          </div>
+        ) : null}
+      </ResponsiveInspector>
     </div>
   );
+}
+
+
+
+function InspectorRating({ label, value }: { label: string; value: number }) {
+  return <div><p className="text-xs font-semibold text-[var(--sq-muted)]">{label}</p><div className="mt-2"><RatingScore value={clampRating(value)} /></div></div>;
+}
+
+function InspectorRow({ label, value }: { label: string; value: string }) {
+  return <div className="flex items-start justify-between gap-4 text-sm"><dt className="text-[var(--sq-muted)]">{label}</dt><dd className="text-right font-semibold text-[var(--sq-ink)]">{value}</dd></div>;
 }
