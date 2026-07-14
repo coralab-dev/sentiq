@@ -1,5 +1,6 @@
 export const PUBLIC_ERROR_MESSAGES = {
   invalid_token: "El enlace no es valido.",
+  invalid_method: "Metodo no permitido.",
   inactive_link: "Este enlace ya no esta disponible.",
   inactive_restaurant: "Este restaurante no esta disponible.",
   inactive_branch: "Esta sucursal no esta disponible.",

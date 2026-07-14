@@ -3,21 +3,7 @@ import { createServiceClient } from "../_shared/supabase-admin.ts";
 import { errorResponse, handleOptions, jsonResponse, readJsonBody } from "../_shared/http.ts";
 import { applyPublicRateLimit } from "../_shared/rate-limit.ts";
 import { getSurveyLinkContext } from "../_shared/survey-link.ts";
-
-type RequestPayload = {
-  token?: unknown;
-  source?: unknown;
-  general_experience?: unknown;
-  service_attention?: unknown;
-  food_quality?: unknown;
-  service_speed?: unknown;
-  comment?: unknown;
-  customer_phone?: unknown;
-  consent_to_contact?: unknown;
-};
-
-const COMMENT_MAX_LENGTH = 1000;
-const PHONE_MAX_LENGTH = 30;
+import { validateSubmitFeedbackPayload, type SubmitFeedbackRequestPayload } from "./validation.ts";
 
 Deno.serve(async (req: Request) => {
   const optionsResponse = handleOptions(req);
@@ -27,11 +13,11 @@ Deno.serve(async (req: Request) => {
     return errorResponse("invalid_method", 405);
   }
 
-  const body = (await readJsonBody(req)) as RequestPayload | null;
-  const validation = validatePayload(body);
+  const body = (await readJsonBody(req)) as SubmitFeedbackRequestPayload | null;
+  const validation = validateSubmitFeedbackPayload(body);
 
   if (!validation.ok) {
-    return errorResponse("invalid_payload", 400, validation.errors.join(","));
+    return errorResponse("invalid_payload", 400);
   }
 
   try {
@@ -45,7 +31,7 @@ Deno.serve(async (req: Request) => {
     const { context } = linkResult;
 
     if (validation.value.source !== context.type) {
-      return errorResponse("invalid_payload", 400, "source_mismatch");
+      return errorResponse("invalid_payload", 400);
     }
 
     const rateLimitResult = await applyPublicRateLimit({
@@ -118,72 +104,3 @@ Deno.serve(async (req: Request) => {
     return errorResponse("server_error", 500);
   }
 });
-
-function validatePayload(body: RequestPayload | null):
-  | {
-      ok: true;
-      value: {
-        token: string;
-        source: "qr" | "device";
-        general_experience: number;
-        service_attention: number;
-        food_quality: number;
-        service_speed: number;
-        comment: string | null;
-        customer_phone: string | null;
-        consent_to_contact: boolean;
-      };
-    }
-  | { ok: false; errors: string[] } {
-  const errors: string[] = [];
-
-  const token = typeof body?.token === "string" ? body.token.trim() : "";
-  if (!token) errors.push("token_required");
-
-  const source = body?.source === "qr" || body?.source === "device" ? body.source : null;
-  if (!source) errors.push("invalid_source");
-
-  const generalExperience = normalizeRating(body?.general_experience);
-  const serviceAttention = normalizeRating(body?.service_attention);
-  const foodQuality = normalizeRating(body?.food_quality);
-  const serviceSpeed = normalizeRating(body?.service_speed);
-
-  if (!generalExperience) errors.push("invalid_general_experience");
-  if (!serviceAttention) errors.push("invalid_service_attention");
-  if (!foodQuality) errors.push("invalid_food_quality");
-  if (!serviceSpeed) errors.push("invalid_service_speed");
-
-  const comment = typeof body?.comment === "string" && body.comment.trim().length > 0 ? body.comment.trim() : null;
-  if (comment && comment.length > COMMENT_MAX_LENGTH) errors.push("comment_too_long");
-
-  const customerPhone = typeof body?.customer_phone === "string" && body.customer_phone.trim().length > 0
-    ? body.customer_phone.trim()
-    : null;
-  if (customerPhone && customerPhone.length > PHONE_MAX_LENGTH) errors.push("phone_too_long");
-
-  const consentToContact = body?.consent_to_contact === true;
-  if (customerPhone && !consentToContact) errors.push("customer_phone_requires_consent");
-
-  if (errors.length > 0 || !source || !generalExperience || !serviceAttention || !foodQuality || !serviceSpeed) {
-    return { ok: false, errors };
-  }
-
-  return {
-    ok: true,
-    value: {
-      token,
-      source,
-      general_experience: generalExperience,
-      service_attention: serviceAttention,
-      food_quality: foodQuality,
-      service_speed: serviceSpeed,
-      comment,
-      customer_phone: customerPhone,
-      consent_to_contact: consentToContact,
-    },
-  };
-}
-
-function normalizeRating(value: unknown): number | null {
-  return Number.isInteger(value) && typeof value === "number" && value >= 1 && value <= 5 ? value : null;
-}
