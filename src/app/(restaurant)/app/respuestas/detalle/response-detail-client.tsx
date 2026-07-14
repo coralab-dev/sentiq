@@ -158,12 +158,12 @@ export function ResponseDetailClient() {
     return (
       <EmptyState
         title="Respuesta no disponible"
-        description="La respuesta no existe o no esta dentro del alcance visible por tu usuario."
+        description="No encontramos esta respuesta o ya no tienes acceso a ella."
         icon={<Store className="size-6" aria-hidden="true" />}
         action={
           <Link
             href={ROUTES.APP_RESPONSES}
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-slate-950 px-3 text-sm font-medium text-white transition hover:bg-slate-800"
+            className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl bg-[var(--sq-aubergine)] px-4 text-sm font-semibold text-white transition hover:bg-[#3c1949]"
           >
             <ArrowLeft className="size-4" aria-hidden="true" />
             Volver a respuestas
@@ -181,13 +181,14 @@ export function ResponseDetailClient() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Respuestas"
         title="Detalle de respuesta"
-        description="Informacion visible segun RLS y permisos de tu sesion."
+        description="Revisa la experiencia completa y el contexto en el que se recibió."
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <Link
               href={ROUTES.APP_RESPONSES}
-              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-[var(--sq-line)] bg-[var(--sq-surface)] px-4 text-sm font-semibold text-[var(--sq-ink)] transition hover:bg-[var(--sq-soft)]"
             >
               <ArrowLeft className="size-4" aria-hidden="true" />
               Volver a respuestas
@@ -196,7 +197,7 @@ export function ResponseDetailClient() {
               type="button"
               onClick={() => void loadDetail()}
               disabled={isRefreshing}
-              className="bg-teal-700 text-white hover:bg-teal-800"
+              className="bg-[var(--sq-aubergine)] text-white hover:bg-[#3c1949]"
             >
               <RefreshCw
                 className={cn("size-4", isRefreshing && "animate-spin")}
@@ -231,7 +232,7 @@ export function ResponseDetailClient() {
         </dl>
       </SectionCard>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="overflow-hidden rounded-2xl border border-[var(--sq-line)] bg-[var(--sq-surface)] sm:grid sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           label="Experiencia general"
           value={<RatingScore value={clampRating(response.general_experience)} />}

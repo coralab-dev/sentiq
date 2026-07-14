@@ -8,12 +8,11 @@ import {
   Power,
   RefreshCw,
   UserRound,
-  X,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { DataTable, PageHeader, SectionCard } from "@/components/panel";
+import { ConfirmDialog, DataTable, PageHeader, ResponsiveInspector, SectionCard } from "@/components/panel";
 import { EmptyState, LoadingState, StatusBadge } from "@/components/shared";
 import { Button } from "@/components/ui/button";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -62,6 +61,7 @@ export function WaitersSettingsClient() {
   const [isSaving, setIsSaving] = useState(false);
   const [busyWaiterId, setBusyWaiterId] = useState<string | null>(null);
   const [message, setMessage] = useState<Message | null>(null);
+  const [pendingWaiter, setPendingWaiter] = useState<WaiterSettingsRow | null>(null);
 
   const loadData = useCallback(async (showLoading = true) => {
     if (showLoading) {
@@ -165,11 +165,7 @@ export function WaitersSettingsClient() {
     }
 
     const nextStatus = row.waiter.status === "active" ? "inactive" : "active";
-    const action = nextStatus === "active" ? "activar" : "desactivar";
-
-    if (!window.confirm(`Quieres ${action} este mesero?`)) {
-      return;
-    }
+    setPendingWaiter(null);
 
     setBusyWaiterId(row.waiter.id);
     setMessage(null);
@@ -184,7 +180,7 @@ export function WaitersSettingsClient() {
     } catch {
       setMessage({
         tone: "error",
-        text: `No se pudo ${action} el mesero.`,
+        text: "No se pudo cambiar el estado del mesero.",
       });
     } finally {
       setBusyWaiterId(null);
@@ -219,7 +215,7 @@ export function WaitersSettingsClient() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Configuracion"
+        eyebrow="Equipo"
         title="Meseros"
         description="Gestiona registros internos opcionales de meseros."
         actions={
@@ -232,19 +228,19 @@ export function WaitersSettingsClient() {
 
       {message ? <MessageText message={message} /> : null}
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="overflow-hidden rounded-2xl border border-[var(--sq-line)] bg-[var(--sq-surface)] sm:grid sm:grid-cols-3">
         <SummaryCard title="Total" value={summary.total} />
         <SummaryCard title="Activos" value={summary.active} />
         <SummaryCard title="Inactivos" value={summary.inactive} />
       </div>
 
       <SectionCard title="Filtro" description="Filtra el listado por sucursal visible.">
-        <label className="block max-w-sm space-y-2 text-sm font-medium text-slate-700">
+        <label className="block max-w-sm space-y-2 text-sm font-medium text-[var(--sq-ink)]">
           <span>Sucursal</span>
           <select
             value={selectedBranchId}
             onChange={(event) => setSelectedBranchId(event.target.value)}
-            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+            className="min-h-11 w-full rounded-xl border border-[var(--sq-line)] bg-[var(--sq-surface)] px-3 text-sm text-[var(--sq-ink)] outline-none focus:border-[var(--sq-coral)] focus:ring-2 focus:ring-[var(--sq-coral-soft)]"
           >
             <option value="all">Todas</option>
             {branches.map((branch) => (
@@ -267,7 +263,7 @@ export function WaitersSettingsClient() {
         rows={filteredRows.map((row) => ({
           id: row.waiter.id,
           cells: {
-            name: <span className="font-medium text-slate-950">{row.waiter.name}</span>,
+            name: <span className="font-medium text-[var(--sq-ink)]">{row.waiter.name}</span>,
             code: row.waiter.internal_code ? (
               <span className="font-mono text-xs">{row.waiter.internal_code}</span>
             ) : (
@@ -294,7 +290,7 @@ export function WaitersSettingsClient() {
                 size="icon"
                 aria-label={`${row.waiter.status === "active" ? "Desactivar" : "Activar"} ${row.waiter.name}`}
                 disabled={Boolean(busyWaiterId)}
-                onClick={() => void toggleWaiter(row)}
+                onClick={() => setPendingWaiter(row)}
               >
                 {busyWaiterId === row.waiter.id ? (
                   <LoaderCircle className="animate-spin" aria-hidden="true" />
@@ -308,7 +304,7 @@ export function WaitersSettingsClient() {
         emptyState={
           <EmptyState
             title="No hay meseros"
-            description="Crea registros opcionales para preparar futuras mediciones por atencion."
+            description="Crea un registro cuando necesites identificar a un mesero en la operación."
             icon={<UserRound className="size-6" aria-hidden="true" />}
           />
         }
@@ -327,6 +323,15 @@ export function WaitersSettingsClient() {
           onSubmit={saveWaiter}
         />
       ) : null}
+      <ConfirmDialog
+        open={Boolean(pendingWaiter)}
+        onOpenChange={(open) => { if (!open) setPendingWaiter(null); }}
+        title={pendingWaiter?.waiter.status === "active" ? "Desactivar mesero" : "Activar mesero"}
+        description={pendingWaiter?.waiter.status === "active" ? "El registro dejará de aparecer como activo hasta que lo reactives." : "El registro volverá a estar disponible para la operación."}
+        confirmLabel={pendingWaiter?.waiter.status === "active" ? "Desactivar" : "Activar"}
+        pending={Boolean(busyWaiterId)}
+        onConfirm={() => pendingWaiter ? toggleWaiter(pendingWaiter) : undefined}
+      />
     </div>
   );
 }
@@ -350,31 +355,25 @@ function WaiterModal({
   onClose: () => void;
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
 }) {
+  const formId = "waiter-settings-form";
+
   return (
-    <div
-      className="fixed inset-0 z-50 grid place-items-center bg-slate-950/40 p-4"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) {
-          onClose();
-        }
-      }}
-    >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="waiter-modal-title"
-        className="w-full max-w-lg rounded-lg bg-white p-5 shadow-xl"
-      >
-        <div className="flex items-center justify-between gap-4">
-          <h2 id="waiter-modal-title" className="text-xl font-semibold text-slate-950">
-            {modal.mode === "create" ? "Nuevo mesero" : "Editar mesero"}
-          </h2>
-          <Button type="button" variant="ghost" size="icon" onClick={onClose} disabled={isSaving} aria-label="Cerrar">
-            <X aria-hidden="true" />
+    <ResponsiveInspector
+      open
+      onOpenChange={(open) => { if (!open) onClose(); }}
+      title={modal.mode === "create" ? "Nuevo mesero" : "Editar mesero"}
+      description="Completa solo los datos que usa tu equipo para identificarlo."
+      footer={
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <Button type="button" variant="outline" onClick={onClose} disabled={isSaving}>Cancelar</Button>
+          <Button type="submit" form={formId} disabled={isSaving}>
+            {isSaving ? <LoaderCircle className="animate-spin" aria-hidden="true" /> : null}
+            {isSaving ? "Guardando..." : "Guardar mesero"}
           </Button>
         </div>
-
-        <form className="mt-5 space-y-5" onSubmit={onSubmit} noValidate>
+      }
+    >
+        <form id={formId} className="space-y-5" onSubmit={onSubmit} noValidate>
           <Field label="Nombre" error={errors.name}>
             <input
               autoFocus
@@ -383,7 +382,7 @@ function WaiterModal({
               onChange={(event) => onChange((current) => ({ ...current, name: event.target.value }))}
               disabled={isSaving}
               aria-invalid={Boolean(errors.name)}
-              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+              className="min-h-11 w-full rounded-xl border border-[var(--sq-line)] bg-[var(--sq-surface)] px-3 text-sm text-[var(--sq-ink)] outline-none focus:border-[var(--sq-coral)] focus:ring-2 focus:ring-[var(--sq-coral-soft)]"
             />
           </Field>
 
@@ -394,7 +393,7 @@ function WaiterModal({
               onChange={(event) => onChange((current) => ({ ...current, internalCode: event.target.value }))}
               disabled={isSaving}
               aria-invalid={Boolean(errors.internalCode)}
-              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+              className="min-h-11 w-full rounded-xl border border-[var(--sq-line)] bg-[var(--sq-surface)] px-3 text-sm text-[var(--sq-ink)] outline-none focus:border-[var(--sq-coral)] focus:ring-2 focus:ring-[var(--sq-coral-soft)]"
             />
           </Field>
 
@@ -404,7 +403,7 @@ function WaiterModal({
               onChange={(event) => onChange((current) => ({ ...current, branchId: event.target.value }))}
               disabled={isSaving}
               aria-invalid={Boolean(errors.branchId)}
-              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+              className="min-h-11 w-full rounded-xl border border-[var(--sq-line)] bg-[var(--sq-surface)] px-3 text-sm text-[var(--sq-ink)] outline-none focus:border-[var(--sq-coral)] focus:ring-2 focus:ring-[var(--sq-coral-soft)]"
             >
               <option value="">Selecciona una sucursal</option>
               {branches.map((branch) => (
@@ -415,18 +414,8 @@ function WaiterModal({
             </select>
           </Field>
 
-          <div className="flex justify-end gap-3 border-t border-slate-200 pt-4">
-            <Button type="button" variant="outline" onClick={onClose} disabled={isSaving}>
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={isSaving}>
-              {isSaving ? <LoaderCircle className="animate-spin" aria-hidden="true" /> : null}
-              {isSaving ? "Guardando..." : "Guardar"}
-            </Button>
-          </div>
         </form>
-      </div>
-    </div>
+    </ResponsiveInspector>
   );
 }
 
@@ -440,7 +429,7 @@ function Field({
   children: ReactNode;
 }) {
   return (
-    <label className="block space-y-2 text-sm font-medium text-slate-700">
+    <label className="block space-y-2 text-sm font-medium text-[var(--sq-ink)]">
       <span>{label}</span>
       {children}
       {error ? <span className="block text-xs font-medium text-red-700">{error}</span> : null}
@@ -450,9 +439,10 @@ function Field({
 
 function SummaryCard({ title, value }: { title: string; value: number }) {
   return (
-    <SectionCard title={title}>
-      <p className="text-3xl font-semibold text-slate-950">{value}</p>
-    </SectionCard>
+    <div className="border-b border-[var(--sq-line)] px-5 py-4 last:border-b-0 sm:border-b-0 sm:border-r sm:last:border-r-0">
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--sq-muted)]">{title}</p>
+      <p className="mt-1 text-2xl font-semibold tracking-tight text-[var(--sq-ink)]">{value}</p>
+    </div>
   );
 }
 

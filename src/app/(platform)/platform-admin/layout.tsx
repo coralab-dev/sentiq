@@ -11,7 +11,7 @@ export default function PlatformAdminLayout({
   children,
 }: PlatformAdminLayoutProps) {
   return (
-    <AppShell>
+    <AppShell variant="platform">
       <PlatformRouteGuard>{children}</PlatformRouteGuard>
     </AppShell>
   );

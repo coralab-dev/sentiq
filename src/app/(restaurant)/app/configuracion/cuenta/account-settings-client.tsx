@@ -88,12 +88,12 @@ export function AccountSettingsClient() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Configuracion"
+        eyebrow="Restaurante"
         title="Cuenta"
-        description="Consulta el plan y estado actual de tu restaurante."
+        description="Consulta el estado de la cuenta y el contexto operativo del restaurante."
       />
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid overflow-hidden rounded-2xl border border-[var(--sq-line)] bg-[var(--sq-surface)] sm:grid-cols-2 xl:grid-cols-4">
         <SummaryCard title="Plan actual" value={account?.planCode ?? "Sin cuenta registrada"} />
         <SummaryCard title="Estado de cuenta">
           <AccountBadge status={account?.accountStatus ?? null} />
@@ -110,7 +110,7 @@ export function AccountSettingsClient() {
       <div className="grid gap-4 xl:grid-cols-2">
         <SectionCard
           title="Datos generales"
-          description="Informacion basica del restaurante visible para esta cuenta."
+          description="Información principal del restaurante."
         >
           <DefinitionList
             items={[
@@ -139,7 +139,7 @@ export function AccountSettingsClient() {
 
       <SectionCard
         title="Uso operativo agregado"
-        description="Conteos seguros; no incluye respuestas, comentarios ni telefonos."
+        description="Actividad disponible para esta cuenta, sin contenido de respuestas ni datos de contacto."
       >
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Metric label="Sucursales totales" value={aggregates.totalBranches} />
@@ -169,19 +169,20 @@ function SummaryCard({
   children?: ReactNode;
 }) {
   return (
-    <SectionCard title={title}>
-      <div className="text-2xl font-semibold text-slate-950">{children ?? value}</div>
-    </SectionCard>
+    <div className="border-l border-[var(--sq-line)] p-5 first:border-l-0">
+      <p className="text-[0.6875rem] font-bold uppercase tracking-[0.09em] text-[var(--sq-muted)]">{title}</p>
+      <div className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[var(--sq-ink)]">{children ?? value}</div>
+    </div>
   );
 }
 
 function DefinitionList({ items }: { items: [string, ReactNode][] }) {
   return (
-    <dl className="divide-y divide-slate-100">
+    <dl className="divide-y divide-[var(--sq-line)]">
       {items.map(([label, value]) => (
         <div key={label} className="grid gap-1 py-3 first:pt-0 last:pb-0 sm:grid-cols-2">
-          <dt className="text-sm font-medium text-slate-500">{label}</dt>
-          <dd className="text-sm font-semibold text-slate-950">{value}</dd>
+          <dt className="text-sm font-medium text-[var(--sq-muted)]">{label}</dt>
+          <dd className="text-sm font-semibold text-[var(--sq-ink)]">{value}</dd>
         </div>
       ))}
     </dl>
@@ -199,8 +200,8 @@ function Metric({
 }) {
   return (
     <div className={wide ? "sm:col-span-2" : undefined}>
-      <p className="text-sm font-medium text-slate-500">{label}</p>
-      <p className="mt-1 text-2xl font-semibold text-slate-950">{value}</p>
+      <p className="text-sm font-medium text-[var(--sq-muted)]">{label}</p>
+      <p className="mt-1 text-2xl font-semibold text-[var(--sq-ink)]">{value}</p>
     </div>
   );
 }

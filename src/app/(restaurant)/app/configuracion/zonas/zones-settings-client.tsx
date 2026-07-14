@@ -11,11 +11,10 @@ import {
   RefreshCw,
   Smartphone,
   Users,
-  X,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { PageHeader, SectionCard } from "@/components/panel";
+import { ConfirmDialog, PageHeader, ResponsiveInspector, SectionCard } from "@/components/panel";
 import { EmptyState, LoadingState, StatusBadge } from "@/components/shared";
 import { Button } from "@/components/ui/button";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -50,6 +49,7 @@ export function ZonesSettingsClient() {
   const [isSaving, setIsSaving] = useState(false);
   const [busyZoneId, setBusyZoneId] = useState<string | null>(null);
   const [message, setMessage] = useState<Message | null>(null);
+  const [pendingZone, setPendingZone] = useState<ZoneWithDevices | null>(null);
 
   const loadData = useCallback(async (showLoading = true) => {
     if (showLoading) setLoadStatus("loading");
@@ -128,11 +128,7 @@ export function ZonesSettingsClient() {
   async function toggleZone(zone: ZoneWithDevices) {
     if (busyZoneId) return;
     const nextStatus = zone.status === "active" ? "inactive" : "active";
-    const activeDevices = zone.devices.filter((device) => device.status === "active").length;
-    const prompt = nextStatus === "inactive" && activeDevices > 0
-      ? "Esta zona tiene dispositivos asignados. Desactivarla no elimina histórico, pero puede afectar la organización operativa. ¿Quieres continuar?"
-      : `¿Quieres ${nextStatus === "active" ? "activar" : "desactivar"} esta zona?`;
-    if (!window.confirm(prompt)) return;
+    setPendingZone(null);
 
     setBusyZoneId(zone.id);
     setMessage(null);
@@ -168,7 +164,7 @@ export function ZonesSettingsClient() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Configuración"
+        eyebrow="Captura"
         title="Zonas"
         description="Organiza las zonas operativas y consulta su contexto por sucursal."
         actions={<Button type="button" onClick={openCreateModal} disabled={branches.length === 0}><Plus aria-hidden="true" />Nueva zona</Button>}
@@ -193,7 +189,7 @@ export function ZonesSettingsClient() {
                     key={item.branch.id}
                     type="button"
                     onClick={() => setSelectedBranchId(item.branch.id)}
-                    className={`w-full rounded-lg border px-3 py-3 text-left transition ${selected ? "border-teal-300 bg-teal-50" : "border-slate-200 bg-white hover:border-slate-300"}`}
+                    className={`min-h-11 w-full rounded-xl border px-3 py-3 text-left transition ${selected ? "border-[var(--sq-coral)] bg-[var(--sq-coral-soft)]" : "border-[var(--sq-line)] bg-[var(--sq-surface)] hover:border-[var(--sq-muted)]"}`}
                   >
                     <span className="flex items-center justify-between gap-3">
                       <span className="font-semibold text-slate-950">{item.branch.name}</span>
@@ -207,7 +203,7 @@ export function ZonesSettingsClient() {
             </div>
           </SectionCard>
 
-          {selectedBranch ? <BranchDetail item={selectedBranch} busyZoneId={busyZoneId} onEdit={openEditModal} onToggle={toggleZone} /> : null}
+          {selectedBranch ? <BranchDetail item={selectedBranch} busyZoneId={busyZoneId} onEdit={openEditModal} onToggle={setPendingZone} /> : null}
         </div>
       )}
 
@@ -223,6 +219,15 @@ export function ZonesSettingsClient() {
           onSubmit={saveZone}
         />
       ) : null}
+      <ConfirmDialog
+        open={Boolean(pendingZone)}
+        onOpenChange={(open) => { if (!open) setPendingZone(null); }}
+        title={pendingZone?.status === "active" ? "Desactivar zona" : "Activar zona"}
+        description={pendingZone?.status === "active" && pendingZone.devices.some((device) => device.status === "active") ? "Esta zona tiene dispositivos activos. Desactivarla no elimina el historial, pero cambia su organización operativa." : pendingZone?.status === "active" ? "La zona dejará de estar disponible para la operación hasta que se reactive." : "La zona volverá a estar disponible para la operación."}
+        confirmLabel={pendingZone?.status === "active" ? "Desactivar" : "Activar"}
+        pending={Boolean(busyZoneId)}
+        onConfirm={() => pendingZone ? toggleZone(pendingZone) : undefined}
+      />
     </div>
   );
 }
@@ -231,7 +236,7 @@ function BranchDetail({ item, busyZoneId, onEdit, onToggle }: {
   item: BranchZoneSettings;
   busyZoneId: string | null;
   onEdit: (zone: ZoneWithDevices) => void;
-  onToggle: (zone: ZoneWithDevices) => Promise<void>;
+  onToggle: (zone: ZoneWithDevices) => void;
 }) {
   const managersEmptyLabel = getManagersEmptyLabel(
     item.managersAvailable,
@@ -301,37 +306,46 @@ function ZoneModal({ modal, draft, errors, branches, isSaving, onDraftChange, on
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
 }) {
   const branchName = branches.find((item) => item.branch.id === draft.branchId)?.branch.name ?? "Sucursal no disponible";
+  const formId = "zone-settings-form";
+
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/40 p-4" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-      <div className="w-full max-w-lg rounded-xl border border-slate-200 bg-white p-5 shadow-xl" role="dialog" aria-modal="true" aria-labelledby="zone-modal-title">
-        <div className="flex items-start justify-between gap-4">
-          <div><p className="text-xs font-semibold uppercase text-teal-700">Configuración</p><h2 id="zone-modal-title" className="mt-1 text-xl font-semibold text-slate-950">{modal.mode === "create" ? "Nueva zona" : "Editar zona"}</h2></div>
-          <Button type="button" variant="ghost" size="icon" onClick={onClose} disabled={isSaving} aria-label="Cerrar"><X aria-hidden="true" /></Button>
+    <ResponsiveInspector
+      open
+      onOpenChange={(open) => { if (!open) onClose(); }}
+      title={modal.mode === "create" ? "Nueva zona" : "Editar zona"}
+      description="Organiza el punto de captura dentro de la sucursal seleccionada."
+      footer={
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <Button type="button" variant="outline" onClick={onClose} disabled={isSaving}>Cancelar</Button>
+          <Button type="submit" form={formId} disabled={isSaving}>
+            {isSaving ? <LoaderCircle className="animate-spin" aria-hidden="true" /> : null}
+            {isSaving ? "Guardando..." : "Guardar zona"}
+          </Button>
         </div>
-        <form className="mt-5 space-y-5" onSubmit={onSubmit} noValidate>
+      }
+    >
+        <form id={formId} className="space-y-5" onSubmit={onSubmit} noValidate>
           <Field label="Sucursal" error={errors.branchId}>
             {modal.mode === "create" ? (
-              <select value={draft.branchId} onChange={(event) => onDraftChange((current) => ({ ...current, branchId: event.target.value }))} className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm" disabled={isSaving} aria-invalid={Boolean(errors.branchId)}>
+              <select value={draft.branchId} onChange={(event) => onDraftChange((current) => ({ ...current, branchId: event.target.value }))} className="min-h-11 w-full rounded-xl border border-[var(--sq-line)] bg-[var(--sq-surface)] px-3 text-sm text-[var(--sq-ink)]" disabled={isSaving} aria-invalid={Boolean(errors.branchId)}>
                 <option value="">Selecciona una sucursal</option>
                 {branches.map((item) => <option key={item.branch.id} value={item.branch.id}>{item.branch.name}</option>)}
               </select>
-            ) : <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">{branchName}</div>}
+            ) : <div className="rounded-xl border border-[var(--sq-line)] bg-[var(--sq-soft)] px-3 py-3 text-sm text-[var(--sq-ink)]">{branchName}</div>}
           </Field>
           <Field label="Nombre de zona" error={errors.name}>
-            <input value={draft.name} onChange={(event) => onDraftChange((current) => ({ ...current, name: event.target.value }))} className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm" disabled={isSaving} aria-invalid={Boolean(errors.name)} autoFocus />
+            <input value={draft.name} onChange={(event) => onDraftChange((current) => ({ ...current, name: event.target.value }))} className="min-h-11 w-full rounded-xl border border-[var(--sq-line)] bg-[var(--sq-surface)] px-3 text-sm text-[var(--sq-ink)]" disabled={isSaving} aria-invalid={Boolean(errors.name)} autoFocus />
           </Field>
           <Field label="Descripción opcional">
-            <textarea value={draft.description} onChange={(event) => onDraftChange((current) => ({ ...current, description: event.target.value }))} className="min-h-24 w-full resize-y rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm" disabled={isSaving} />
+            <textarea value={draft.description} onChange={(event) => onDraftChange((current) => ({ ...current, description: event.target.value }))} className="min-h-28 w-full resize-y rounded-xl border border-[var(--sq-line)] bg-[var(--sq-surface)] px-3 py-3 text-sm text-[var(--sq-ink)]" disabled={isSaving} />
           </Field>
-          <div className="flex justify-end gap-3 border-t border-slate-200 pt-4"><Button type="button" variant="outline" onClick={onClose} disabled={isSaving}>Cancelar</Button><Button type="submit" disabled={isSaving}>{isSaving ? <LoaderCircle className="animate-spin" aria-hidden="true" /> : null}{isSaving ? "Guardando..." : "Guardar zona"}</Button></div>
         </form>
-      </div>
-    </div>
+    </ResponsiveInspector>
   );
 }
 
 function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
-  return <label className="block space-y-2 text-sm font-medium text-slate-700"><span>{label}</span>{children}{error ? <span className="block text-xs font-medium text-red-700">{error}</span> : null}</label>;
+  return <label className="block space-y-2 text-sm font-medium text-[var(--sq-ink)]"><span>{label}</span>{children}{error ? <span className="block text-xs font-medium text-red-700">{error}</span> : null}</label>;
 }
 
 function DataPoint({ label, value }: { label: string; value: string }) {

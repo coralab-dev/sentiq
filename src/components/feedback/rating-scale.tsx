@@ -25,7 +25,7 @@ export function RatingScale({
   error,
   className,
   name,
-  "aria-label": ariaLabel = "Selecciona una calificacion",
+  "aria-label": ariaLabel = "Selecciona una calificación",
 }: RatingScaleProps) {
   const generatedId = useId();
   const errorId = `${name ?? generatedId}-error`;
@@ -51,12 +51,12 @@ export function RatingScale({
           />
         ))}
       </div>
-      <div className="flex justify-between text-xs font-medium text-slate-500">
+      <div className="flex justify-between text-xs font-medium text-[#756b77]">
         <span>{minLabel}</span>
         <span>{maxLabel}</span>
       </div>
       {error && (
-        <p id={errorId} className="text-sm font-medium text-red-600">
+        <p id={errorId} className="text-sm font-medium text-red-700">
           {error}
         </p>
       )}
@@ -85,10 +85,10 @@ function RatingButton({
       name={name}
       aria-pressed={selected}
       className={cn(
-        "flex size-10 items-center justify-center rounded-full border text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-teal-600/25 disabled:cursor-not-allowed disabled:opacity-50",
+        "flex h-14 min-w-0 flex-1 items-center justify-center rounded-xl border text-base font-semibold transition focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[color:var(--survey-accent,#2b1235)]/20 disabled:cursor-not-allowed disabled:opacity-50 sm:h-16 sm:text-lg",
         selected
-          ? "border-teal-700 bg-teal-700 text-white shadow-sm"
-          : "border-slate-300 bg-white text-slate-700 hover:border-teal-600 hover:text-teal-700",
+          ? "border-[var(--survey-accent,#2b1235)] bg-[var(--survey-accent,#2b1235)] text-white shadow-sm"
+          : "border-[#d8cdbf] bg-white text-[#2b1235] hover:border-[var(--survey-accent,#2b1235)] hover:bg-[#fbf7ef]",
         invalid && !selected && "border-red-300 text-red-700 hover:border-red-400",
         className
       )}

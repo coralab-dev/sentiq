@@ -15,7 +15,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 
-import { PageHeader, SectionCard } from "@/components/panel";
+import { ConfirmDialog, PageHeader, SectionCard } from "@/components/panel";
 import { EmptyState, LoadingState, StatusBadge } from "@/components/shared";
 import { Button } from "@/components/ui/button";
 import { EDGE_FUNCTIONS } from "@/config/edge-functions";
@@ -37,6 +37,7 @@ import {
 } from "./devices-settings-data";
 
 type LoadStatus = "loading" | "success" | "error";
+type PendingDeviceAction = { type: "regenerate" | "toggle"; row: DeviceSettingsRow } | null;
 type Message = { tone: "success" | "error"; text: string };
 
 const EMPTY_DRAFT: DeviceDraft = {
@@ -79,6 +80,7 @@ export function DevicesSettingsClient() {
   const [temporaryLinks, setTemporaryLinks] = useState<Record<string, TemporaryDeviceLink>>({});
   const [rowMessages, setRowMessages] = useState<Record<string, Message>>({});
   const [pageMessage, setPageMessage] = useState<Message | null>(null);
+  const [pendingAction, setPendingAction] = useState<PendingDeviceAction>(null);
 
   const loadData = useCallback(async (showLoading = true) => {
     if (showLoading) setLoadStatus("loading");
@@ -179,7 +181,7 @@ export function DevicesSettingsClient() {
   async function regenerateLink(row: DeviceSettingsRow) {
     const deviceId = row.device.id;
     if (!deviceId || busyDeviceId) return;
-    if (!window.confirm("El enlace anterior dejara de funcionar. ¿Quieres regenerarlo?")) return;
+    setPendingAction(null);
 
     setBusyDeviceId(deviceId);
     setRowMessages((current) => {
@@ -233,8 +235,7 @@ export function DevicesSettingsClient() {
     if (!deviceId || busyDeviceId) return;
 
     const nextStatus = row.device.status === "active" ? "inactive" : "active";
-    const action = nextStatus === "inactive" ? "desactivar" : "activar";
-    if (!window.confirm(`¿Quieres ${action} este dispositivo?`)) return;
+    setPendingAction(null);
 
     setBusyDeviceId(deviceId);
     try {
@@ -260,7 +261,7 @@ export function DevicesSettingsClient() {
     } catch {
       setRowMessage(deviceId, {
         tone: "error",
-        text: `No se pudo ${action} el dispositivo.`,
+        text: "No se pudo cambiar el estado del dispositivo.",
       });
     } finally {
       setBusyDeviceId(null);
@@ -307,14 +308,14 @@ export function DevicesSettingsClient() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Configuracion"
+        eyebrow="Captura"
         title="Dispositivos"
         description="Administra los dispositivos usados para capturar encuestas internas."
         actions={
           <Button
             type="button"
             onClick={() => setShowCreateForm((current) => !current)}
-            className="bg-teal-700 text-white hover:bg-teal-800"
+            className="bg-[var(--sq-aubergine)] text-white hover:bg-[#3c1949]"
           >
             {showCreateForm ? <X aria-hidden="true" /> : <Plus aria-hidden="true" />}
             {showCreateForm ? "Cancelar" : "Nuevo dispositivo"}
@@ -322,9 +323,9 @@ export function DevicesSettingsClient() {
         }
       />
 
-      <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+      <div className="rounded-2xl border border-[var(--sq-line)] bg-[var(--sq-soft)] px-4 py-4 text-sm text-[var(--sq-ink)]">
         <div className="flex gap-3">
-          <ShieldCheck className="mt-0.5 size-5 shrink-0 text-amber-700" aria-hidden="true" />
+          <ShieldCheck className="mt-0.5 size-5 shrink-0 text-[var(--sq-olive)]" aria-hidden="true" />
           <p>
             El enlace completo solo se muestra al crear o regenerar. Los enlaces existentes no
             pueden reconstruirse desde sus ultimos cuatro caracteres.
@@ -407,7 +408,7 @@ export function DevicesSettingsClient() {
           icon={<MonitorSmartphone className="size-6" aria-hidden="true" />}
         />
       ) : (
-        <div className="grid gap-5 xl:grid-cols-2">
+        <div className="space-y-4">
           {rows.map((row) => {
             const deviceId = row.device.id;
             const temporaryLink = temporaryLinks[deviceId];
@@ -490,7 +491,7 @@ export function DevicesSettingsClient() {
                   <div className="grid gap-3 sm:grid-cols-2">
                     <Button
                       type="button"
-                      onClick={() => void regenerateLink(row)}
+                      onClick={() => setPendingAction({ type: "regenerate", row })}
                       disabled={Boolean(busyDeviceId)}
                     >
                       {isBusy ? <LoaderCircle className="animate-spin" aria-hidden="true" /> : <RefreshCw aria-hidden="true" />}
@@ -499,7 +500,7 @@ export function DevicesSettingsClient() {
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => void toggleDevice(row)}
+                      onClick={() => setPendingAction({ type: "toggle", row })}
                       disabled={Boolean(busyDeviceId)}
                     >
                       <Power aria-hidden="true" />
@@ -512,6 +513,15 @@ export function DevicesSettingsClient() {
           })}
         </div>
       )}
+      <ConfirmDialog
+        open={Boolean(pendingAction)}
+        onOpenChange={(open) => { if (!open) setPendingAction(null); }}
+        title={pendingAction?.type === "regenerate" ? "Regenerar enlace" : pendingAction?.row.device.status === "active" ? "Desactivar dispositivo" : "Activar dispositivo"}
+        description={pendingAction?.type === "regenerate" ? "El enlace anterior dejará de funcionar y el nuevo enlace completo se mostrará una sola vez." : pendingAction?.row.device.status === "active" ? "El dispositivo dejará de aceptar respuestas hasta que se reactive." : "El dispositivo volverá a estar disponible para captura."}
+        confirmLabel={pendingAction?.type === "regenerate" ? "Regenerar" : pendingAction?.row.device.status === "active" ? "Desactivar" : "Activar"}
+        pending={Boolean(busyDeviceId)}
+        onConfirm={() => pendingAction?.type === "regenerate" ? regenerateLink(pendingAction.row) : pendingAction ? toggleDevice(pendingAction.row) : undefined}
+      />
     </div>
   );
 }

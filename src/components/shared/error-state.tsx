@@ -17,7 +17,7 @@ type ErrorStateProps = {
 };
 
 export function ErrorState({
-  title = "No pudimos cargar la informacion",
+  title = "No pudimos cargar la información",
   description = "Intenta de nuevo en unos segundos.",
   action,
   secondaryAction,

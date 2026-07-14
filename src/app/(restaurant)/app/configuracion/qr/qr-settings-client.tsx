@@ -12,7 +12,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 
-import { PageHeader, SectionCard } from "@/components/panel";
+import { ConfirmDialog, PageHeader, SectionCard } from "@/components/panel";
 import { EmptyState, LoadingState, StatusBadge } from "@/components/shared";
 import { Button } from "@/components/ui/button";
 import { EDGE_FUNCTIONS } from "@/config/edge-functions";
@@ -79,6 +79,7 @@ export function QrSettingsClient() {
   const [rows, setRows] = useState<QrSettingsRow[]>([]);
   const [loadStatus, setLoadStatus] = useState<LoadStatus>("loading");
   const [regeneratingBranchId, setRegeneratingBranchId] = useState<string | null>(null);
+  const [pendingRegenerationBranchId, setPendingRegenerationBranchId] = useState<string | null>(null);
   const [temporaryLinks, setTemporaryLinks] = useState<
     Record<string, TemporaryGeneratedLink>
   >({});
@@ -117,14 +118,7 @@ export function QrSettingsClient() {
       return;
     }
 
-    const confirmed = window.confirm(
-      "El enlace anterior dejara de funcionar. ¿Quieres regenerar el enlace QR?",
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
+    setPendingRegenerationBranchId(null);
     setRegeneratingBranchId(branchId);
     setRowMessages((current) => {
       const next = { ...current };
@@ -228,14 +222,14 @@ export function QrSettingsClient() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Configuracion"
-        title="Codigos QR por sucursal"
+        eyebrow="Captura"
+        title="Códigos QR por sucursal"
         description="Consulta el estado de cada enlace y regenera un QR cuando necesites reemplazarlo."
       />
 
-      <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+      <div className="rounded-2xl border border-[var(--sq-line)] bg-[var(--sq-soft)] px-4 py-4 text-sm text-[var(--sq-ink)]">
         <div className="flex gap-3">
-          <ShieldCheck className="mt-0.5 size-5 shrink-0 text-amber-700" aria-hidden="true" />
+          <ShieldCheck className="mt-0.5 size-5 shrink-0 text-[var(--sq-olive)]" aria-hidden="true" />
           <p>
             Por seguridad, el enlace completo solo se muestra al regenerarlo. No es posible
             reconstruir enlaces existentes desde los ultimos cuatro caracteres.
@@ -246,11 +240,11 @@ export function QrSettingsClient() {
       {rows.length === 0 ? (
         <EmptyState
           title="No hay sucursales visibles"
-          description="Las sucursales disponibles segun RLS apareceran aqui."
+          description="Las sucursales activas aparecerán aquí cuando estén disponibles para tu cuenta."
           icon={<Store className="size-6" aria-hidden="true" />}
         />
       ) : (
-        <div className="grid gap-5 xl:grid-cols-2">
+        <div className="space-y-4">
           {rows.map((row) => {
             const branchId = row.branch.id;
             const temporaryLink = temporaryLinks[branchId];
@@ -338,9 +332,9 @@ export function QrSettingsClient() {
 
                   <Button
                     type="button"
-                    onClick={() => void regenerateQr(branchId)}
+                    onClick={() => setPendingRegenerationBranchId(branchId)}
                     disabled={!branchId || Boolean(regeneratingBranchId)}
-                    className="w-full bg-teal-700 text-white hover:bg-teal-800"
+                    className="w-full bg-[var(--sq-aubergine)] text-white hover:bg-[#3c1949]"
                   >
                     {isRegenerating ? (
                       <LoaderCircle className="animate-spin" aria-hidden="true" />
@@ -355,6 +349,15 @@ export function QrSettingsClient() {
           })}
         </div>
       )}
+      <ConfirmDialog
+        open={Boolean(pendingRegenerationBranchId)}
+        onOpenChange={(open) => { if (!open) setPendingRegenerationBranchId(null); }}
+        title="Regenerar código QR"
+        description="El enlace anterior dejará de funcionar. El nuevo enlace completo se mostrará una sola vez."
+        confirmLabel="Regenerar enlace"
+        pending={Boolean(regeneratingBranchId)}
+        onConfirm={() => pendingRegenerationBranchId ? regenerateQr(pendingRegenerationBranchId) : undefined}
+      />
     </div>
   );
 }

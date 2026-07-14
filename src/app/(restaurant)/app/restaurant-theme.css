@@ -1,0 +1,38 @@
+.restaurant-app {
+  --sq-canvas: #fbf7ef;
+  --sq-surface: #fffdf8;
+  --sq-soft: #f3eee4;
+  --sq-ink: #24102d;
+  --sq-aubergine: #2b1235;
+  --sq-coral: #ff5947;
+  --sq-coral-soft: #ffe6df;
+  --sq-olive: #647200;
+  --sq-olive-soft: #eaf1a5;
+  --sq-muted: #756875;
+  --sq-line: rgb(56 32 62 / 13%);
+  accent-color: var(--sq-coral);
+}
+
+.restaurant-app ::selection {
+  background: var(--sq-coral-soft);
+  color: var(--sq-ink);
+}
+
+.restaurant-app :focus-visible {
+  scroll-margin: 6rem;
+}
+
+.restaurant-app [data-slot="button"] {
+  min-height: 2.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .restaurant-app *,
+  .restaurant-app *::before,
+  .restaurant-app *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

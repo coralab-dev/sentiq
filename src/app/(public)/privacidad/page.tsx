@@ -4,14 +4,14 @@ export default function PrivacyPage() {
       <article className="mx-auto flex w-full max-w-3xl flex-col gap-8">
         <header className="space-y-3">
           <p className="text-sm font-semibold uppercase tracking-wide text-teal-800">
-            Demo controlada SentiQ
+            Piloto controlado SentiQ
           </p>
           <h1 className="text-3xl font-semibold tracking-normal sm:text-4xl">
-            Aviso de privacidad provisional para demo controlada
+            Aviso de privacidad provisional para piloto controlado
           </h1>
           <p className="max-w-2xl text-base leading-7 text-slate-600">
-            Esta página explica, en lenguaje simple, cómo se tratan los datos
-            capturados durante una demo controlada de SentiQ. Es un aviso
+            Esta página explica, en lenguaje sencillo, cómo se tratan los datos
+            capturados durante un piloto controlado de SentiQ. Es un aviso
             provisional y no sustituye una revisión legal definitiva.
           </p>
         </header>
@@ -19,23 +19,24 @@ export default function PrivacyPage() {
         <section className="space-y-3">
           <h2 className="text-xl font-semibold">Qué es este aviso</h2>
           <p className="leading-7 text-slate-700">
-            Este aviso sirve solo para acompañar una demo controlada de la
+            Este aviso sirve solo para acompañar un piloto controlado de la
             encuesta SentiQ. No es un aviso de privacidad legal definitivo para
-            venta formal, expansión comercial o un piloto externo más amplio.
+            venta formal, expansión comercial o un uso externo más amplio.
           </p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-xl font-semibold">Responsable provisional</h2>
           <p className="leading-7 text-slate-700">
-            El responsable provisional durante la demo es SentiQ, operado provisionalmente por Balam Eduardo Silva Domínguez.
+            El responsable provisional durante el piloto es SentiQ, operado
+            provisionalmente por Balam Eduardo Silva Domínguez.
           </p>
           <p className="leading-7 text-slate-700">
-            Para solicitudes de privacidad, corrección o eliminación durante la
-            demo, el contacto provisional es{" "}
+            Para solicitudes de privacidad, corrección o eliminación durante el
+            piloto, el contacto provisional es{" "}
             <a
               href="mailto:coralab.web@gmail.com"
-              className="font-medium text-teal-800 underline-offset-4 hover:underline"
+              className="font-medium text-teal-800 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-teal-600/25"
             >
               coralab.web@gmail.com
             </a>
@@ -44,13 +45,13 @@ export default function PrivacyPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-xl font-semibold">Alcance de la demo</h2>
+          <h2 className="text-xl font-semibold">Alcance del piloto</h2>
           <p className="leading-7 text-slate-700">
-            La demo permite probar el flujo de encuesta, captura de comentarios,
-            seguimiento de experiencias reportadas y visualización de respuestas
-            por parte del restaurante. Durante esta demo controlada pueden
-            capturarse datos personales reales, incluido un teléfono, solo bajo
-            las condiciones descritas en este aviso.
+            El piloto permite probar el flujo de encuesta, captura de
+            comentarios, seguimiento de experiencias reportadas y visualización
+            de respuestas por parte del restaurante. Durante este piloto
+            controlado pueden capturarse datos personales reales, incluido un
+            teléfono, solo bajo las condiciones descritas en este aviso.
           </p>
         </section>
 
@@ -79,7 +80,7 @@ export default function PrivacyPage() {
           <h2 className="text-xl font-semibold">Uso del teléfono opcional</h2>
           <p className="leading-7 text-slate-700">
             El teléfono no es obligatorio. Puede capturarse un teléfono real
-            durante la demo solo si la persona decide compartirlo y acepta el
+            durante el piloto solo si la persona decide compartirlo y acepta el
             consentimiento explícito mostrado en la encuesta.
           </p>
           <p className="leading-7 text-slate-700">
@@ -110,11 +111,11 @@ export default function PrivacyPage() {
           <p className="leading-7 text-slate-700">
             El equipo operador de SentiQ solo puede acceder a la información
             cuando sea necesario para soporte técnico, corrección, eliminación u
-            operación de la demo.
+            operación del piloto.
           </p>
           <p className="leading-7 text-slate-700">
-            El platform admin no debe ver teléfonos ni respuestas individuales
-            por defecto.
+            El acceso está restringido por roles y no debe utilizarse para fines
+            distintos a la operación, soporte o seguimiento autorizados.
           </p>
         </section>
 
@@ -131,34 +132,45 @@ export default function PrivacyPage() {
           <h2 className="text-xl font-semibold">Papel de SentiQ</h2>
           <p className="leading-7 text-slate-700">
             SentiQ funciona como herramienta técnica para capturar, mostrar y
-            operar las respuestas de la encuesta durante la demo controlada.
+            operar las respuestas de la encuesta durante el piloto controlado.
           </p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-xl font-semibold">Conservación de datos</h2>
           <p className="leading-7 text-slate-700">
-            Los datos personales se conservarán hasta terminar la demo.
+            Los datos necesarios para operar el piloto podrán conservarse
+            durante su ejecución y hasta cinco meses después de su cierre, con el
+            propósito de entregar exportaciones, resolver incidencias y acordar
+            la continuidad del servicio.
           </p>
           <p className="leading-7 text-slate-700">
-            Al finalizar la demo, los datos personales se eliminarán o anonimizarán y se conservarán únicamente métricas agregadas.
+            Al terminar ese plazo, los teléfonos deberán eliminarse y los
+            comentarios que puedan identificar a una persona deberán eliminarse o
+            anonimizarse. Podrán conservarse métricas agregadas que no incluyan
+            datos personales.
           </p>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-xl font-semibold">
-            Solicitudes de corrección o eliminación durante demo
+            Solicitudes de corrección, eliminación o anonimización
           </h2>
           <p className="leading-7 text-slate-700">
-            Durante la demo, cualquier solicitud para corregir o eliminar datos
-            puede enviarse a{" "}
+            Durante el piloto, cualquier solicitud para corregir, eliminar o
+            anonimizar datos puede enviarse a{" "}
             <a
               href="mailto:coralab.web@gmail.com"
-              className="font-medium text-teal-800 underline-offset-4 hover:underline"
+              className="font-medium text-teal-800 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-teal-600/25"
             >
               coralab.web@gmail.com
             </a>
-            . Estas solicitudes se revisarán durante la operación de la demo.
+            .
+          </p>
+          <p className="leading-7 text-slate-700">
+            Las solicitudes autorizadas de eliminación o anonimización se
+            atenderán en un plazo máximo de tres meses. Si una obligación legal
+            o contractual exige un plazo menor, se aplicará el plazo menor.
           </p>
         </section>
 
@@ -166,9 +178,9 @@ export default function PrivacyPage() {
           <h2 className="text-xl font-semibold">Revisión legal pendiente</h2>
           <p className="leading-7 text-slate-700">
             Este aviso es provisional. Antes de una venta formal, una expansión
-            o un piloto externo más amplio, el aviso y los procesos de
-            privacidad deberán pasar por revisión legal y convertirse en un
-            aviso definitivo.
+            o un uso externo más amplio, el aviso y los procesos de privacidad
+            deberán pasar por revisión legal y convertirse en un aviso
+            definitivo.
           </p>
         </section>
       </article>
