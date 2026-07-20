@@ -10,7 +10,7 @@ export function getRealtimeStatusLabel(status: RealtimeStatus): string {
   }
 
   if (status === "idle") {
-    return "Preparando actualizacion automatica";
+    return "Preparando actualización automática";
   }
 
   return "Realtime no disponible; usando refresco cada 60s";

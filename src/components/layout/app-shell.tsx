@@ -8,7 +8,6 @@ import {
   LogOut,
   Menu,
   MessageSquareText,
-  MoreHorizontal,
   Settings,
   X,
 } from "lucide-react";
@@ -29,6 +28,8 @@ import {
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { UserRole } from "@/types/domain";
+
+import { MobileMoreMenu } from "./mobile-more-menu";
 
 type AppShellProps = {
   children: ReactNode;
@@ -308,18 +309,6 @@ export function AppShell({ children, variant }: AppShellProps) {
         <main className="min-w-0 px-4 py-5 pb-28 sm:px-6 sm:py-6 md:pb-8 lg:px-8 lg:py-8 xl:px-10">{children}</main>
       </div>
 
-      {isMobileMenuOpen ? (
-        <div id="restaurant-mobile-more" role="dialog" aria-modal="true" aria-label="Más opciones" className="fixed inset-x-3 bottom-20 z-50 rounded-2xl border border-[var(--sq-line)] bg-[var(--sq-surface)] p-4 shadow-2xl md:hidden">
-          <UserSummary sessionState={sessionState} />
-          <div className="mt-4 border-t border-[var(--sq-line)] pt-4">
-            <AppNavigation role={sessionState.role} variant="platform" items={secondaryMobileNavigation} onNavigate={() => setIsMobileMenuOpen(false)} />
-          </div>
-          <Button type="button" variant="ghost" className="mt-3 min-h-11 w-full justify-start" onClick={() => void handleLogout()} disabled={isLoggingOut}>
-            <LogOut aria-hidden="true" />{isLoggingOut ? "Saliendo..." : "Cerrar sesión"}
-          </Button>
-        </div>
-      ) : null}
-
       <nav aria-label="Navegación principal" className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-[var(--sq-line)] bg-[var(--sq-surface)]/96 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-md md:hidden">
         {primaryMobileNavigation.map((item) => {
           const Icon = navigationIcons[item.href] ?? LayoutDashboard;
@@ -330,9 +319,21 @@ export function AppShell({ children, variant }: AppShellProps) {
             </Link>
           );
         })}
-        <button type="button" onClick={() => setIsMobileMenuOpen((open) => !open)} aria-expanded={isMobileMenuOpen} className="flex min-h-12 flex-col items-center justify-center gap-1 rounded-lg text-[0.6875rem] font-semibold text-[var(--sq-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sq-coral)]">
-          <MoreHorizontal className="size-5" aria-hidden="true" />Más
-        </button>
+        <MobileMoreMenu
+          open={isMobileMenuOpen}
+          onOpenChange={setIsMobileMenuOpen}
+          userSummary={<UserSummary sessionState={sessionState} />}
+          navigation={
+            <AppNavigation
+              role={sessionState.role}
+              variant="platform"
+              items={secondaryMobileNavigation}
+              onNavigate={() => setIsMobileMenuOpen(false)}
+            />
+          }
+          isLoggingOut={isLoggingOut}
+          onLogout={() => void handleLogout()}
+        />
       </nav>
     </div>
   );

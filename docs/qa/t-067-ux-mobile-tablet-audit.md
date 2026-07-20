@@ -1,102 +1,110 @@
 # T-067 UX mobile/tablet audit
 
-Fecha: 2026-07-14
+| Campo | Valor |
+| --- | --- |
+| Fecha | 2026-07-20 |
+| Base auditada | `master` en `6a3fdf0e8fe286861d91758b6095c7b7c1b39033` más los cambios locales de esta rama |
+| Commit del rediseño | `6a3fdf0e8fe286861d91758b6095c7b7c1b39033` |
+| Commit del fix | Sin commit; cambios locales auditados por restricción de COR-137 |
+| Rama | `balamsilva26/cor-137-fix-ux-redesign-regressions` |
+| Estado | `PASS WITH CAVEATS` |
 
-Commit auditado: `fe88f05` con cambios locales sin commit en la rama `balamsilva26/cor-137-t-067-pulido-ux-pre-piloto-en-mobiletablet-y-textos-publicos`.
+## Dictamen
 
-Dictamen: `PASS WITH CAVEATS`
+`PASS WITH CAVEATS`. Las correcciones de copy, encoding, jerarquía, responsive y navegación autenticada fueron verificadas localmente. Los flujos QR y dispositivo activos se ejecutaron con enlaces QA privados y datos ficticios, sin registrar sus valores en esta evidencia. El despliegue público conserva parte del copy anterior porque no se hizo deploy; el mensaje corregido del dispositivo se verificó contra el build local auditado. No se registraron tokens, correos, teléfonos ni credenciales.
 
-## Archivos cambiados
+## Alcance auditado
 
-- `src/app/(public)/page.tsx`
-- `src/app/(public)/privacidad/page.tsx`
-- `src/app/(auth)/login/page.tsx`
-- `src/features/capture/components/public-qr-survey.tsx`
-- `src/features/capture/components/public-device-survey.tsx`
-- `src/components/feedback/thank-you-message.tsx`
-- `src/components/feedback/rating-scale.tsx`
-- `src/components/shared/error-state.tsx`
-- `src/components/shared/loading-state.tsx`
-- `src/app/(public)/public-copy.test.mjs`
-- `docs/qa/t-067-ux-mobile-tablet-audit.md`
+Se revisaron y/o ajustaron:
 
-## Copy corregido
+- Landing pública.
+- Login.
+- Aviso de privacidad.
+- Encuesta QR y encuesta en dispositivo.
+- Shell del restaurante y menú móvil “Más”.
+- Dashboard, respuestas, alertas, exportación y configuración.
+- Tablas, inspectores y diálogos compartidos.
+- Copy operativo del alta de restaurantes y estados compartidos.
 
-- QR: `Ingresa un teléfono válido de 8 a 15 dígitos.`
-- Dispositivo: `La encuesta se reiniciará automáticamente después de enviar.`
-- Agradecimiento QR: `Puedes cerrar esta pestaña. Tu respuesta ya fue registrada.`
-- Agradecimiento dispositivo: `La encuesta se reiniciará automáticamente en unos segundos.`
-- Login: acentos en `sesión`, `correo electrónico`, `contraseña`, `operación`.
-- Login: se retiraron roles internos y rutas técnicas visibles.
-- Privacidad: se cambió `demo controlada` por `piloto controlado`.
-- Privacidad: se agregó conservación durante el piloto y hasta cinco meses después del cierre.
-- Privacidad: se agregó plazo máximo de tres meses para solicitudes autorizadas de eliminación o anonimización.
-- Estados compartidos: acentos en `información` y `calificación`.
-
-## Rediseño
-
-La landing pública se reemplazó por una estructura SaaS sobria y responsive:
-
-- Header compacto con marca, aviso de privacidad e inicio de sesión.
-- Hero con copy aprobado, CTA principal y ancla a `#como-funciona`.
-- Vista conceptual del producto sin imágenes externas, sin métricas falsas y sin posiciones absolutas frágiles.
-- Tres beneficios operativos.
-- Sección `Cómo funciona` con cuatro pasos.
-- Bloque de privacidad y confianza con consentimiento explícito.
-- CTA final y footer con `Piloto controlado`.
+No se modificaron contratos de API, payloads de encuesta, permisos, roles ni la arquitectura de Supabase.
 
 ## Matriz de viewports
 
-La verificación automatizada de overflow visual no se ejecutó por instrucción del usuario: la prueba visual será manual.
+Resultados permitidos: `PASS`, `FAIL`, `NOT TESTED`, `NOT APPLICABLE`.
 
-| Pantalla | 360x800 | 390x844 | 768x1024 | 1024x768 | 1440x900 |
-| --- | --- | --- | --- | --- | --- |
-| Landing | Pendiente usuario | Pendiente usuario | Pendiente usuario | Pendiente usuario | Pendiente usuario |
-| Login | Pendiente usuario | Pendiente usuario | Pendiente usuario | Pendiente usuario | Pendiente usuario |
-| Privacidad | Pendiente usuario | Pendiente usuario | Pendiente usuario | Pendiente usuario | Pendiente usuario |
-| QR inválido | Pendiente usuario | Pendiente usuario | Pendiente usuario | No requerido | No requerido |
-| QR activo | Pendiente usuario | Pendiente usuario | Pendiente usuario | No requerido | No requerido |
-| Device inválido | No requerido | No requerido | Pendiente usuario | Pendiente usuario | No requerido |
-| Device activo | No requerido | No requerido | Pendiente usuario | Pendiente usuario | Pendiente usuario |
+| Pantalla / flujo | 320×568 | 360×800 | 390×844 | 430×932 | 768×1024 | 820×1180 | 1024×768 | 1440×900 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Landing `/` | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS |
+| Login `/login` | NOT TESTED | NOT TESTED | PASS | NOT TESTED | NOT TESTED | NOT TESTED | NOT TESTED | NOT TESTED |
+| Privacidad `/privacidad` | NOT TESTED | NOT TESTED | PASS | NOT TESTED | NOT TESTED | NOT TESTED | NOT TESTED | NOT TESTED |
+| QR inválido `/s?token=…` | NOT TESTED | NOT TESTED | PASS | NOT TESTED | NOT TESTED | NOT TESTED | NOT APPLICABLE | NOT APPLICABLE |
+| Dispositivo inválido `/d?token=…` | NOT TESTED | NOT TESTED | PASS | NOT TESTED | NOT TESTED | NOT TESTED | NOT APPLICABLE | NOT APPLICABLE |
+| QR activo | NOT TESTED | NOT TESTED | PASS | NOT TESTED | NOT TESTED | NOT TESTED | NOT APPLICABLE | NOT APPLICABLE |
+| Dispositivo activo | NOT APPLICABLE | NOT APPLICABLE | PASS | NOT TESTED | NOT TESTED | NOT TESTED | NOT TESTED | NOT APPLICABLE |
+| Dashboard autenticado | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS |
+| Respuestas autenticado | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS |
+| Alertas autenticado | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS |
+| Exportación autenticado | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS |
+| Configuración autenticado | PASS | PASS | PASS | PASS | PASS | PASS | PASS | PASS |
 
-## Resultado por ruta
+En `/s/invalid-cor-137-token` y `/d/invalid-cor-137-token` el proyecto devuelve 404 porque las páginas implementadas son `/s` y `/d` con token en query. La validación equivalente se ejecutó sin exponer el valor del token en la evidencia.
 
-- `/`: cambios implementados; visual pendiente por usuario.
-- `/login`: cambios implementados; visual pendiente por usuario.
-- `/privacidad`: cambios implementados; visual pendiente por usuario.
-- `/s/invalid-cor-137-token`: flujo de error genérico preservado; visual pendiente por usuario.
-- `/d/invalid-cor-137-token`: flujo de error genérico preservado; visual pendiente por usuario.
-- QR activo: no probado por falta de enlace QA privado en este hilo.
-- Device activo: no probado por falta de enlace QA privado en este hilo.
+## Overflow y revisión visual
+
+- La landing se abrió con Playwright en los ocho viewports requeridos.
+- En todos los viewports de la landing, `document.documentElement.scrollWidth === window.innerWidth` y `document.body.scrollWidth === window.innerWidth`.
+- El preview de encuesta usa una columna en móvil y dos desde `sm`.
+- Login y privacidad se abrieron a 390×844 sin overflow; login mostró un único `h1` con “Bienvenido de vuelta.”.
+- Con una cuenta QA se recorrieron `/app/dashboard`, `/app/respuestas`, `/app/alertas`, `/app/exportar` y `/app/configuracion` en los ocho viewports; las 40 combinaciones quedaron sin overflow horizontal.
+- En el panel autenticado se verificaron el menú “Más”, filtros, tarjetas de respuestas, inspector, exportación y configuración a 390×844.
+- El menú “Más” abrió con foco dentro del diálogo, bloqueó el fondo, cerró con Escape, devolvió el foco al trigger y se cerró antes de navegar a Configuración.
+
+## Pruebas funcionales de captura
+
+| Flujo | Resultado | Evidencia |
+| --- | --- | --- |
+| QR inválido | PASS | `/s?token=…` mostró “Enlace no disponible” sin overflow a 390×844. |
+| Dispositivo inválido | PASS | `/d?token=…` mostró “Enlace no disponible” sin overflow a 390×844. |
+| QR activo | PASS | Enlace QA activo probado a 390×844: cuatro calificaciones, validaciones, consentimiento, teléfono inválido, envío y mensaje final. |
+| Dispositivo activo | PASS | Enlace QA activo probado a 390×844: sucursal, zona y dispositivo, envío, mensaje de reinicio, limpieza tras cuatro segundos y “Nueva encuesta”. |
+
+Se enviaron respuestas QA ficticias; no se usaron datos personales reales. No se regeneraron tokens.
+
+## Correcciones verificadas
+
+- Se eliminó el mojibake real de dashboard, preguntas y respuestas; la prueba preventiva recorre `src/app/(restaurant)`, `src/app/(public)`, `src/app/(auth)`, `src/components` y `src/features/capture`.
+- Se corrigieron acentos en operación, atención, métricas, filtros, paginación, teléfono, exportación, sesión, conexión, configuración, cuenta y estados compartidos.
+- La landing ahora distingue entre sucursal correspondiente y zona configurada cuando aplica.
+- Login: `Bienvenido de vuelta.` es el único `h1` principal; el encabezado editorial pasó a `h2`.
+- “Más” usa `@base-ui/react/dialog` con trigger, backdrop, popup, title y close; el estado controlado permite cierre por navegación y Base UI gestiona Escape, foco inicial, focus trap y retorno al trigger.
+- Se agregaron pruebas de copy público, copy operativo, jerarquía del login, responsive del preview, menú móvil y encoding.
 
 ## Pruebas ejecutadas
 
-- `node --test "src/app/(public)/public-copy.test.mjs"`: PASS. Primero falló con el copy anterior y después pasó con el cambio.
-- `pnpm lint`: PASS.
-- `pnpm typecheck`: PASS.
-- `pnpm build`: PASS.
-- `pnpm qa:public-build`: PASS.
-- `node --test "src/app/(capture)/capture-survey-token.test.mjs"`: PASS, con warning existente de Node por módulo sin `type`.
-- `node --test supabase/functions/regenerate_device_token/index.test.mjs`: PASS.
+| Comando | Resultado |
+| --- | --- |
+| `pnpm lint` | PASS |
+| `pnpm typecheck` | PASS |
+| `pnpm test:ui` | PASS — 80 pruebas, 80 exitosas |
+| `node --test "src/app/(public)/public-copy.test.mjs"` | PASS — 9 pruebas |
+| `node --test "src/app/(capture)/capture-survey-token.test.mjs"` | PASS — incluido en `test:ui` |
+| `node --test "supabase/functions/regenerate_device_token/index.test.mjs"` | PASS — incluido en `test:ui` |
+| `pnpm build` | PASS — ejecución final |
+| `pnpm qa:public-build` | PASS — ejecución final |
 
-## Limitaciones
+Las pruebas Node existentes emiten el warning no bloqueante de `MODULE_TYPELESS_PACKAGE_JSON` para módulos TypeScript importados directamente.
 
-- No se ejecutaron pruebas visuales automatizadas ni capturas porque el usuario indicó que realizará esa prueba.
-- No se probaron QR activo ni device activo porque no se proporcionaron enlaces QA privados en este hilo.
-- No se enviaron respuestas de encuesta.
-- No se regeneraron tokens.
+## Limitaciones y caveats
 
-## Hallazgos pendientes
-
-- Completar revisión visual manual en los viewports requeridos.
-- Registrar screenshots manuales si se necesitan como evidencia externa.
-- Probar QR activo y device activo con enlaces QA privados, sin documentar tokens ni parámetros sensibles.
+- El despliegue público usado para los enlaces activos conserva copy anterior en algunos textos configurables y en el aviso de reinicio; el build local auditado ya muestra el mensaje corregido. No se hizo deploy por restricción de COR-137.
+- La exploración detallada de login, privacidad y captura se concentró en 390×844; la matriz conserva `NOT TESTED` en sus viewports secundarios. La landing y el panel sí tuvieron comprobación de overflow en los ocho viewports.
+- La URL documentada para captura es `/s` y `/d` con token en query; las variantes `/s/<token>` y `/d/<token>` no corresponden al routing implementado.
 
 ## Confirmaciones
 
-- No se modificó schema, migraciones, RLS ni datos de Supabase.
-- No se modificaron Edge Functions.
-- No se agregaron dependencias.
+- No se modificó schema, migraciones, RLS ni configuración administrativa de Supabase; solo se enviaron respuestas QA ficticias mediante los enlaces activos autorizados.
+- No se modificaron Supabase Edge Functions.
+- No se modificaron contratos de API, payloads de encuesta, permisos, roles ni tokens.
 - No se hizo deploy.
-- No se cerró COR-137 en Linear.
+- No se cerró COR-137.
 - No se hizo commit, push ni PR.

@@ -200,7 +200,7 @@ export function WaitersSettingsClient() {
     return (
       <EmptyState
         title="No se pudieron cargar los meseros"
-        description="Verifica tu conexion e intenta nuevamente."
+        description="Verifica tu conexión e intenta nuevamente."
         icon={<AlertTriangle className="size-6" aria-hidden="true" />}
         action={
           <Button type="button" onClick={() => void loadData()}>

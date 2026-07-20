@@ -198,7 +198,7 @@ export function QrSettingsClient() {
     return (
       <LoadingState
         title="Cargando codigos QR"
-        description="Consultando sucursales y enlaces visibles para tu sesion."
+        description="Consultando sucursales y enlaces visibles para tu sesión."
       />
     );
   }
@@ -207,7 +207,7 @@ export function QrSettingsClient() {
     return (
       <EmptyState
         title="No se pudo cargar la configuracion QR"
-        description="Verifica tu conexion e intenta nuevamente."
+        description="Verifica tu conexión e intenta nuevamente."
         icon={<AlertTriangle className="size-6" aria-hidden="true" />}
         action={
           <Button type="button" onClick={() => void loadData()}>
@@ -273,7 +273,7 @@ export function QrSettingsClient() {
                     </div>
                     <div className="space-y-1">
                       <dt className="text-xs font-semibold uppercase text-slate-500">
-                        Ultima regeneracion
+                        Última regeneración
                       </dt>
                       <dd className="text-sm text-slate-700">{formatDateTime(lastRegeneration)}</dd>
                     </div>

@@ -122,7 +122,7 @@ export function getNavigationForRole(role: UserRole) {
   return [
     ...restaurantNavigation,
     {
-      label: "Configuracion",
+      label: "Configuración",
       href: ROUTES.APP_SETTINGS,
     },
   ];

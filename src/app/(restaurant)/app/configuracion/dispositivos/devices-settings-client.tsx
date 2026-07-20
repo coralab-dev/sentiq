@@ -293,7 +293,7 @@ export function DevicesSettingsClient() {
     return (
       <EmptyState
         title="No se pudieron cargar los dispositivos"
-        description="Verifica tu conexion e intenta nuevamente."
+        description="Verifica tu conexión e intenta nuevamente."
         icon={<AlertTriangle className="size-6" aria-hidden="true" />}
         action={
           <Button type="button" onClick={() => void loadData()}>
@@ -441,7 +441,7 @@ export function DevicesSettingsClient() {
                       value={row.link?.token_last4 ? `•••• ${row.link.token_last4}` : "Sin identificador"}
                       mono
                     />
-                    <DataPoint label="Ultima regeneracion" value={formatDateTime(lastRegeneration)} />
+                    <DataPoint label="Última regeneración" value={formatDateTime(lastRegeneration)} />
                     <DataPoint
                       label="Ultimo uso"
                       value={formatDateTime(row.device.last_used_at ?? row.link?.last_used_at ?? null)}

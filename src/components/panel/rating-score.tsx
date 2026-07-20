@@ -28,7 +28,7 @@ export function RatingScore({ value, label, className }: RatingScoreProps) {
         getRatingStyle(value),
         className,
       )}
-      aria-label={label ?? `Calificacion ${value} de 5`}
+      aria-label={label ?? `Calificación ${value} de 5`}
     >
       <Star className="size-3.5 fill-current" aria-hidden="true" />
       {value}/5

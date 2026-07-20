@@ -10,8 +10,8 @@ type DateFilterProps = SelectHTMLAttributes<HTMLSelectElement> & {
 
 const defaultOptions = [
   { label: "Hoy", value: "today" },
-  { label: "Ultimos 7 dias", value: "7d" },
-  { label: "Ultimos 30 dias", value: "30d" },
+  { label: "Últimos 7 días", value: "7d" },
+  { label: "Últimos 30 días", value: "30d" },
   { label: "Personalizado", value: "custom" },
 ];
 

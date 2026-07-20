@@ -308,28 +308,28 @@ export function AlertDetailClient() {
               <MetricCard
                 label="Experiencia general"
                 value={<RatingScore value={clampRating(response.general_experience)} />}
-                helper="Calificacion de 1 a 5"
+                helper="Calificación de 1 a 5"
                 variant={response.general_experience <= 2 ? "danger" : "success"}
                 icon={<CalendarDays className="size-5" aria-hidden="true" />}
               />
               <MetricCard
-                label="Atencion"
+                label="Atención"
                 value={<RatingScore value={clampRating(response.service_attention)} />}
-                helper="Calificacion de 1 a 5"
+                helper="Calificación de 1 a 5"
                 variant="info"
                 icon={<Bell className="size-5" aria-hidden="true" />}
               />
               <MetricCard
                 label="Alimentos/bebidas"
                 value={<RatingScore value={clampRating(response.food_quality)} />}
-                helper="Calificacion de 1 a 5"
+                helper="Calificación de 1 a 5"
                 variant="success"
                 icon={<Store className="size-5" aria-hidden="true" />}
               />
               <MetricCard
                 label="Rapidez"
                 value={<RatingScore value={clampRating(response.service_speed)} />}
-                helper="Calificacion de 1 a 5"
+                helper="Calificación de 1 a 5"
                 variant="neutral"
                 icon={<RefreshCw className="size-5" aria-hidden="true" />}
               />
@@ -339,7 +339,7 @@ export function AlertDetailClient() {
               <DetailItem label="Fecha respuesta" value={formatDateTime(response.created_at)} />
               <DetailItem label="Origen respuesta" value={formatSource(response.source)} />
               <DetailItem
-                label="Telefono"
+                label="Teléfono"
                 value={
                   phoneAllowed ? (
                     <span className="inline-flex items-center gap-1.5">

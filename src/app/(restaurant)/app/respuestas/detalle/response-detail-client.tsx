@@ -236,28 +236,28 @@ export function ResponseDetailClient() {
         <MetricCard
           label="Experiencia general"
           value={<RatingScore value={clampRating(response.general_experience)} />}
-          helper="Calificacion de 1 a 5"
+          helper="Calificación de 1 a 5"
           variant={response.general_experience <= 2 ? "danger" : "success"}
           icon={<CalendarDays className="size-5" aria-hidden="true" />}
         />
         <MetricCard
-          label="Atencion"
+          label="Atención"
           value={<RatingScore value={clampRating(response.service_attention)} />}
-          helper="Calificacion de 1 a 5"
+          helper="Calificación de 1 a 5"
           variant="info"
           icon={<Bell className="size-5" aria-hidden="true" />}
         />
         <MetricCard
           label="Alimentos/bebidas"
           value={<RatingScore value={clampRating(response.food_quality)} />}
-          helper="Calificacion de 1 a 5"
+          helper="Calificación de 1 a 5"
           variant="success"
           icon={<Store className="size-5" aria-hidden="true" />}
         />
         <MetricCard
           label="Rapidez"
           value={<RatingScore value={clampRating(response.service_speed)} />}
-          helper="Calificacion de 1 a 5"
+          helper="Calificación de 1 a 5"
           variant="neutral"
           icon={<RefreshCw className="size-5" aria-hidden="true" />}
         />
@@ -294,7 +294,7 @@ export function ResponseDetailClient() {
         <div className="grid gap-6 xl:grid-cols-2">
           <dl className="grid gap-5 sm:grid-cols-2">
             <DetailItem
-              label="Telefono"
+          label="Teléfono"
               value={
                 <span className="inline-flex items-center gap-1.5">
                   <Phone className="size-4 text-slate-500" aria-hidden="true" />

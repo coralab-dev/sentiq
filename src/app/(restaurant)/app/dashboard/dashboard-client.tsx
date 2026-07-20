@@ -275,9 +275,9 @@ export function DashboardClient() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="OperaciÃ³n"
+        eyebrow="Operación"
         title="Resumen general"
-        description="Revisa primero lo que necesita atenciÃ³n y mantÃ©n el contexto de la experiencia reciente."
+        description="Revisa primero lo que necesita atención y mantén el contexto de la experiencia reciente."
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <Link
@@ -308,7 +308,7 @@ export function DashboardClient() {
           <div className="space-y-1 text-xs text-slate-500">
             {data.lastUpdatedAt ? (
               <p>
-                Ultima actualizacion: {formatDateTime(data.lastUpdatedAt.toISOString())}
+                Última actualización: {formatDateTime(data.lastUpdatedAt.toISOString())}
               </p>
             ) : null}
             <p>{getRealtimeStatusLabel(realtimeStatus)}</p>
@@ -403,7 +403,7 @@ export function DashboardClient() {
               icon={<Star className="size-5" aria-hidden="true" />}
             />
             <MetricCard
-              label="Atencion recibida"
+              label="Atención recibida"
               value={formatMetricAverage(metrics.serviceAttention)}
               helper="Promedio de 1 a 5"
               variant="info"
@@ -483,7 +483,7 @@ export function DashboardClient() {
           {showEmptyResponsesState ? (
             <EmptyState
               title="No hay respuestas para estos filtros"
-              description="Las metricas se mostraran cuando existan respuestas visibles en el rango seleccionado."
+              description="Las métricas se mostrarán cuando existan respuestas visibles en el rango seleccionado."
               icon={<CalendarDays className="size-6" aria-hidden="true" />}
             />
           ) : null}

@@ -230,9 +230,9 @@ export function ResponsesClient() {
       branchId: (value) => data.branches.find((branch) => branch.id === value)?.name ?? value,
       zoneId: (value) => data.zones.find((zone) => zone.id === value)?.name ?? value,
       source: (value) => value === "qr" ? "Origen: QR" : "Origen: dispositivo",
-      lowRating: (value) => value === "lte2" ? "Experiencia de 1â€“2" : "Experiencia de 1â€“3",
+      lowRating: (value) => value === "lte2" ? "Experiencia de 1–2" : "Experiencia de 1–3",
       comment: (value) => value === "with_comment" ? "Con comentario" : "Sin comentario",
-      phone: (value) => value === "with_phone" ? "Con telÃ©fono consentido" : "Sin telÃ©fono",
+      phone: (value) => value === "with_phone" ? "Con teléfono consentido" : "Sin teléfono",
       alert: (value) => value === "with_alert" ? "Con alerta" : "Sin alerta",
     },
   );
@@ -313,7 +313,7 @@ export function ResponsesClient() {
             ) : null}
             <Button type="button" variant="outline" onClick={() => setShowAdvancedFilters((visible) => !visible)} aria-expanded={showAdvancedFilters}>
               <ListFilter className="size-4" aria-hidden="true" />
-              {showAdvancedFilters ? "Ocultar filtros" : "MÃ¡s filtros"}
+              {showAdvancedFilters ? "Ocultar filtros" : "Más filtros"}
             </Button>
             <Button
               type="button"
@@ -413,7 +413,7 @@ export function ResponsesClient() {
             <option value="device">Dispositivo</option>
           </select>
         </FilterField>
-        <FilterField label="Calificacion">
+        <FilterField label="Calificación">
           <select
             value={filters.lowRating}
             disabled={isRefreshing}
@@ -423,8 +423,8 @@ export function ResponsesClient() {
             className={inputClassName}
           >
             <option value="all">Todas</option>
-            <option value="lte3">Experiencia &lt;= 3</option>
-            <option value="lte2">Experiencia &lt;= 2</option>
+            <option value="lte3">Experiencia ≤ 3</option>
+            <option value="lte2">Experiencia ≤ 2</option>
           </select>
         </FilterField>
         <FilterField label="Comentario">
@@ -441,7 +441,7 @@ export function ResponsesClient() {
             <option value="without_comment">Sin comentario</option>
           </select>
         </FilterField>
-        <FilterField label="Telefono">
+        <FilterField label="Teléfono">
           <select
             value={filters.phone}
             disabled={isRefreshing}
@@ -451,8 +451,8 @@ export function ResponsesClient() {
             className={inputClassName}
           >
             <option value="all">Todos</option>
-            <option value="with_phone">Con telefono consentido</option>
-            <option value="without_phone">Sin telefono</option>
+            <option value="with_phone">Con teléfono consentido</option>
+            <option value="without_phone">Sin teléfono</option>
           </select>
         </FilterField>
         </> : null}
@@ -482,7 +482,7 @@ export function ResponsesClient() {
           >
             {pageSizeOptions.map((option) => (
               <option key={option} value={option}>
-                {option} por pagina
+                {option} por página
               </option>
             ))}
           </select>
@@ -494,7 +494,7 @@ export function ResponsesClient() {
           <span className="text-xs font-semibold text-[var(--sq-muted)]">Filtros activos</span>
           {activeFilterChips.map((chip) => (
             <button key={chip.key} type="button" onClick={() => updateFilters({ [chip.key]: "all" } as Partial<ResponseFilters>)} className="inline-flex min-h-9 items-center rounded-full border border-[var(--sq-line)] bg-[var(--sq-surface)] px-3 text-xs font-semibold text-[var(--sq-ink)] transition hover:border-[var(--sq-coral)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sq-coral)]" aria-label={`Quitar filtro ${chip.label}`}>
-              {chip.label}<span className="ml-2 text-[var(--sq-coral)]" aria-hidden="true">Ã—</span>
+              {chip.label}<span className="ml-2 text-[var(--sq-coral)]" aria-hidden="true">×</span>
             </button>
           ))}
         </div>
@@ -608,7 +608,7 @@ export function ResponsesClient() {
                 Anterior
               </Button>
               <span className="text-sm font-medium text-[var(--sq-ink)]">
-                Pagina {pagination.page} de {pagination.totalPages}
+                Página {pagination.page} de {pagination.totalPages}
               </span>
               <Button
                 type="button"

@@ -68,7 +68,7 @@ export function validateExportFilters(
   const rangeDays = Math.floor((endDate.getTime() - startDate.getTime()) / 86_400_000) + 1;
 
   if (rangeDays > MAX_RANGE_DAYS) {
-    return "El rango maximo de exportacion es de 90 dias.";
+    return "El rango máximo de exportación es de 90 días.";
   }
 
   if (

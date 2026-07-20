@@ -36,7 +36,7 @@ type LoadStatus = "loading" | "success" | "error";
 
 const metricLabels = {
   general_experience: "Experiencia general",
-  service_attention: "Atencion recibida",
+  service_attention: "Atención recibida",
   food_quality: "Alimentos o bebidas",
   service_speed: "Rapidez del servicio",
 } as const;
@@ -168,7 +168,7 @@ export function QuestionsSettingsClient() {
     return (
       <EmptyState
         title="No se pudo cargar la configuracion"
-        description="Verifica tu sesion y vuelve a intentar."
+        description="Verifica tu sesión y vuelve a intentar."
         icon={<AlertTriangle className="size-6" aria-hidden="true" />}
         action={
           <Button type="button" onClick={() => void loadData()}>
@@ -184,7 +184,7 @@ export function QuestionsSettingsClient() {
     <div className="space-y-6">
       <PageHeader
         eyebrow="Restaurante"
-        title="ConfiguraciÃ³n de encuesta"
+        title="Configuración de encuesta"
         description="Ajusta los textos y preguntas que verán tus clientes durante la captura."
         actions={
           <Link
@@ -199,7 +199,7 @@ export function QuestionsSettingsClient() {
 
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="space-y-6">
-        <SectionCard title="Branding bÃ¡sico">
+        <SectionCard title="Branding básico">
           <div className="grid gap-4 md:grid-cols-3">
             {(["logo_url", "primary_color", "secondary_color"] as const).map((field) => (
               <label key={field} className="space-y-2 text-sm font-semibold text-slate-900">

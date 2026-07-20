@@ -128,7 +128,7 @@ export function ExportClient() {
   if (loadStatus === "loading") {
     return (
       <LoadingState
-        title="Cargando exportacion"
+        title="Cargando exportación"
         description="Estamos consultando las sucursales visibles para tu usuario."
       />
     );
@@ -229,7 +229,7 @@ export function ExportClient() {
       {data.branches.length === 0 ? (
         <EmptyState
           title="Sin sucursales visibles"
-          description="No hay sucursales activas disponibles para tu usuario. La exportacion no se puede generar sin alcance visible."
+          description="No hay sucursales activas disponibles para tu usuario. La exportación no se puede generar sin alcance visible."
           icon={<FileDown className="size-6" aria-hidden="true" />}
         />
       ) : null}
@@ -260,11 +260,11 @@ function getExportErrorMessage(error: unknown): string {
     : undefined;
 
   if (context?.status === 400) {
-    return "Los filtros enviados no son validos. Revisa el rango y vuelve a intentar.";
+    return "Los filtros enviados no son válidos. Revisa el rango y vuelve a intentar.";
   }
 
   if (context?.status === 401) {
-    return "Tu sesion no esta autorizada. Vuelve a iniciar sesion.";
+    return "Tu sesión no está autorizada. Vuelve a iniciar sesión.";
   }
 
   if (context?.status === 404) {

@@ -100,3 +100,30 @@ test("landing hero and product scenes use the refined editorial direction", asyn
   assert.doesNotMatch(source, /Cada visita deja una señal\./);
   assert.doesNotMatch(source, /Tu experiencia/);
 });
+
+test("landing explains branch and optional zone association precisely", async () => {
+  const source = await readSource("src/app/(public)/page.tsx");
+
+  assert.match(
+    source,
+    /SentiQ\s+registra la respuesta en la sucursal correspondiente y, cuando aplica, en la zona configurada\./,
+  );
+  assert.doesNotMatch(
+    source,
+    /SentiQ\s+registra la respuesta dentro de la sucursal y zona correctas\./,
+  );
+  assert.doesNotMatch(source, /Demo pública · Fase 2/);
+});
+
+test("login exposes one primary mobile heading for the access form", async () => {
+  const source = await readSource("src/app/(auth)/login/page.tsx");
+
+  assert.match(source, /<h1\b/);
+  assert.match(source, /<h1[^>]*>[\s\S]*Bienvenido de vuelta\.[\s\S]*<\/h1>/);
+});
+
+test("landing survey preview collapses to one column on narrow screens", async () => {
+  const source = await readSource("src/app/(public)/page.tsx");
+
+  assert.match(source, /grid-cols-1[^\n]*sm:grid-cols-\[/);
+});
