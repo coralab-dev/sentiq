@@ -125,7 +125,7 @@ export default function PublicHomePage() {
               </h3>
               <p className="mt-5 text-lg leading-8 text-[#695b68]">
                 Configura las preguntas y los textos que verá el cliente. SentiQ
-                registra la respuesta dentro de la sucursal y zona correctas.
+                registra la respuesta en la sucursal correspondiente y, cuando aplica, en la zona configurada.
               </p>
               <ul className="mt-7 space-y-4 text-[#4f4150]">
                 <FeatureCheck>Acceso público mediante QR</FeatureCheck>
@@ -374,7 +374,7 @@ function SurveyPreview() {
     <div className="relative min-h-[34rem] overflow-hidden border-y border-[#38203e]/15 bg-[#f3eee4] p-5 sm:p-8">
       <div className="absolute inset-0 opacity-40 [background-image:linear-gradient(rgba(43,18,53,.08)_1px,transparent_1px),linear-gradient(90deg,rgba(43,18,53,.08)_1px,transparent_1px)] [background-size:40px_40px]" aria-hidden="true" />
       <div className="relative flex items-center justify-between border-b border-[#38203e]/15 pb-4 text-xs font-bold uppercase tracking-[0.16em] text-[#766976]"><span>Captura en mesa</span><span>Sucursal Centro · Comedor</span></div>
-      <div className="relative mt-10 grid grid-cols-[0.78fr_1.22fr] items-end gap-4 sm:gap-7">
+      <div className="relative mt-10 grid grid-cols-1 items-end gap-6 sm:grid-cols-[0.78fr_1.22fr] sm:gap-7">
         <div className="mb-8 border border-[#38203e]/15 bg-[#fffdf8] p-4 shadow-[10px_12px_0_0_#ff5947] sm:p-6">
           <p className="text-2xl font-semibold tracking-[-0.04em]">Comparte tu visita.</p>
           <div className="mx-auto my-8 grid aspect-square w-24 place-items-center border-8 border-[#2b1235] bg-white text-[#2b1235] sm:w-32"><QrCode className="size-14 sm:size-20" aria-hidden="true" /></div>

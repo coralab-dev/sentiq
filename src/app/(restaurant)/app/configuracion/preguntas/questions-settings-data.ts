@@ -134,7 +134,7 @@ export async function loadQuestionsSettingsData(
   const { data: userData, error: userError } = await supabase.auth.getUser();
 
   if (userError || !userData.user) {
-    throw userError ?? new Error("No hay una sesion autenticada.");
+    throw userError ?? new Error("No hay una sesión autenticada.");
   }
 
   const { data: profile, error: profileError } = await supabase

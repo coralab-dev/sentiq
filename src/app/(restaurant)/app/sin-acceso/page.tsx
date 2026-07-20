@@ -14,7 +14,7 @@ export default function RestaurantAccessDeniedPage() {
       <SectionCard>
         <EmptyState
           title="Acceso restringido"
-          description="Este estado reutiliza el componente base para pantallas bloqueadas o sin informacion disponible."
+          description="Este estado reutiliza el componente base para pantallas bloqueadas o sin información disponible."
           className="min-h-80 border-solid shadow-none"
         />
       </SectionCard>

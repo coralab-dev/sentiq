@@ -172,7 +172,7 @@ export function SurveyFormLayout({
 
         {mode === "device" && onReset ? (
           <div className="flex flex-col items-center justify-center gap-2 px-2 text-center text-sm leading-6 text-[#756b77] sm:flex-row sm:gap-3">
-            <p>La encuesta se reiniciará automáticamente después de enviar.</p>
+            <p>La encuesta se reiniciará automáticamente en unos segundos.</p>
             <button
               type="button"
               className="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 font-semibold text-[#2b1235] underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--survey-accent)]"

@@ -93,11 +93,11 @@ export function validateWaiterDraft(
   if (!name) {
     errors.name = "El nombre es obligatorio.";
   } else if (name.length > 120) {
-    errors.name = "El nombre debe tener maximo 120 caracteres.";
+    errors.name = "El nombre debe tener máximo 120 caracteres.";
   }
 
   if (internalCode.length > 50) {
-    errors.internalCode = "El codigo interno debe tener maximo 50 caracteres.";
+    errors.internalCode = "El código interno debe tener máximo 50 caracteres.";
   }
 
   if (!branches.some((branch) => branch.id === draft.branchId)) {

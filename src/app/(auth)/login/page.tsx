@@ -163,9 +163,9 @@ export default function LoginPage() {
               <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#ff5947]">
                 Acceso para restaurantes
               </p>
-              <h1 className="mt-5 text-balance text-5xl font-semibold leading-[0.98] tracking-[-0.05em] xl:text-6xl">
+              <h2 className="mt-5 text-balance text-5xl font-semibold leading-[0.98] tracking-[-0.05em] xl:text-6xl">
                 Escucha la operación. Da seguimiento.
-              </h1>
+              </h2>
               <p className="mt-5 max-w-lg text-lg leading-8 text-[#615761]">
                 Respuestas, alertas y herramientas del restaurante en un espacio
                 de trabajo con acceso controlado.
@@ -202,9 +202,9 @@ export default function LoginPage() {
               <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#ff5947]">
                 Panel del restaurante
               </p>
-              <h2 className="mt-4 text-4xl font-semibold tracking-[-0.045em] sm:text-5xl">
+              <h1 className="mt-4 text-4xl font-semibold tracking-[-0.045em] sm:text-5xl">
                 Bienvenido de vuelta.
-              </h2>
+              </h1>
               <p className="mt-4 text-base leading-7 text-[#716671]">
                 Ingresa con el correo y la contraseña asignados a tu perfil.
               </p>

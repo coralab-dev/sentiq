@@ -75,7 +75,7 @@ test("rechaza nombre vacio, largos invalidos y branch ajeno", () => {
   );
 
   assert.equal(errors.name, "El nombre es obligatorio.");
-  assert.equal(errors.internalCode, "El codigo interno debe tener maximo 50 caracteres.");
+  assert.equal(errors.internalCode, "El código interno debe tener máximo 50 caracteres.");
   assert.equal(errors.branchId, "Selecciona una sucursal visible.");
 });
 

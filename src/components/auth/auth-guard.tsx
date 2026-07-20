@@ -60,7 +60,7 @@ export function AuthGuard({
     return (
       <LoadingState
         title={loadingTitle}
-        description="Estamos revisando tu sesion y permisos."
+        description="Estamos revisando tu sesión y permisos."
         className="min-h-screen rounded-none border-0 shadow-none"
       />
     );

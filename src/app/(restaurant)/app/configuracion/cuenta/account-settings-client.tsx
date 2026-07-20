@@ -51,7 +51,7 @@ export function AccountSettingsClient() {
     return (
       <LoadingState
         title="Cargando cuenta"
-        description="Consultando datos basicos, plan y actividad agregada."
+        description="Consultando datos básicos, plan y actividad agregada."
       />
     );
   }
@@ -60,7 +60,7 @@ export function AccountSettingsClient() {
     return (
       <EmptyState
         title="No se pudo cargar la cuenta"
-        description="Verifica tu conexion e intenta nuevamente."
+        description="Verifica tu conexión e intenta nuevamente."
         icon={<AlertTriangle className="size-6" aria-hidden="true" />}
         action={
           <Button onClick={() => void loadData()}>
@@ -117,7 +117,7 @@ export function AccountSettingsClient() {
               ["Nombre", data.restaurant.name],
               ["Slug", data.restaurant.slug],
               ["Fecha de alta", formatDate(data.restaurant.createdAt)],
-              ["Ultima actualizacion", formatDateTime(data.restaurant.updatedAt)],
+              ["Última actualización", formatDateTime(data.restaurant.updatedAt)],
             ]}
           />
         </SectionCard>
@@ -131,7 +131,7 @@ export function AccountSettingsClient() {
               ["Plan", account?.planCode ?? "Sin cuenta registrada"],
               ["Estado de cuenta", <AccountBadge key="account-status" status={account?.accountStatus ?? null} />],
               ["Fecha inicio", formatDate(account?.startedAt ?? null)],
-              ["Fecha cancelacion", formatDate(account?.cancelledAt ?? null)],
+              ["Fecha de cancelación", formatDate(account?.cancelledAt ?? null)],
             ]}
           />
         </SectionCard>
@@ -149,7 +149,7 @@ export function AccountSettingsClient() {
           <Metric label="Dispositivos activos" value={aggregates.activeDevices} />
           <Metric label="QR / links activos" value={aggregates.activeSurveyLinks} />
           <Metric
-            label="Ultima actividad"
+            label="Última actividad"
             value={formatDateTime(aggregates.lastOperationalActivityAt)}
             wide
           />

@@ -6,8 +6,8 @@ export default function NotFound() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12">
       <EmptyState
-        title="Pagina no encontrada"
-        description="La pagina que buscas no esta disponible o cambio de ubicacion."
+        title="Página no encontrada"
+        description="La página que buscas no está disponible o cambió de ubicación."
         action={
           <Link
             href="/"
