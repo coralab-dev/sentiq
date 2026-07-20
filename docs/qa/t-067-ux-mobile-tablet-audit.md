@@ -85,10 +85,11 @@ Se enviaron respuestas QA ficticias; no se usaron datos personales reales. No se
 | --- | --- |
 | `pnpm lint` | PASS |
 | `pnpm typecheck` | PASS |
-| `pnpm test:ui` | PASS — 80 pruebas, 80 exitosas |
+| `pnpm test:ui` | PASS — 81 pruebas, 81 exitosas |
 | `node --test "src/app/(public)/public-copy.test.mjs"` | PASS — 9 pruebas |
 | `node --test "src/app/(capture)/capture-survey-token.test.mjs"` | PASS — incluido en `test:ui` |
-| `node --test "supabase/functions/regenerate_device_token/index.test.mjs"` | PASS — incluido en `test:ui` |
+| `node --test "supabase/functions/regenerate_device_token/index.test.mjs"` | PASS — ejecutado por separado; no forma parte de `test:ui` |
+| `pnpm check` | PASS |
 | `pnpm build` | PASS — ejecución final |
 | `pnpm qa:public-build` | PASS — ejecución final |
 

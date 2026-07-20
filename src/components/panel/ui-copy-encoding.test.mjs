@@ -4,13 +4,7 @@ import path from "node:path";
 import test from "node:test";
 
 const root = process.cwd();
-const sourceRoots = [
-  "src/app/(restaurant)",
-  "src/app/(public)",
-  "src/app/(auth)",
-  "src/components",
-  "src/features/capture",
-];
+const sourceRoots = ["src"];
 const sourceExtensions = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs"]);
 const ignoredDirectories = new Set(["node_modules", ".next", "out", "coverage"]);
 const mojibakePatterns = [
