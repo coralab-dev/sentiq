@@ -26,4 +26,6 @@ test("mobile more menu is a controlled accessible dialog trigger", async () => {
   assert.match(menu, /<Dialog\.Close/);
   assert.match(menu, /Más opciones/);
   assert.match(menu, /safe-area-inset-bottom/);
+  assert.match(menu, /bg-\[var\(--sq-surface,#fffdf8\)\]/);
+  assert.match(menu, /bg-\[var\(--sq-aubergine,#2b1235\)\]\/35/);
 });
